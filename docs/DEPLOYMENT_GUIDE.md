@@ -35,6 +35,14 @@ reports/
 
 Generated local outputs and private data stay local unless explicitly published as a sanitized dashboard snapshot.
 
+Current GitHub repository:
+
+```txt
+https://github.com/JeongK7998/Nomad-Life
+```
+
+Vercel project `nomad-life` is connected to this repository for push-based deployments.
+
 ## Vercel
 
 Initial Vercel deployment is static:
