@@ -145,6 +145,25 @@ main {
   outline: 0;
 }
 
+.overview-card.status-ok {
+  border-color: rgba(0, 168, 107, 0.36);
+}
+
+.overview-card.status-idle {
+  border-color: rgba(112, 115, 124, 0.28);
+}
+
+.overview-card.status-pending {
+  border-color: rgba(234, 179, 8, 0.48);
+}
+
+.overview-card.status-attention {
+  border-color: rgba(239, 68, 68, 0.5);
+  background:
+    linear-gradient(0deg, rgba(239, 68, 68, 0.045), rgba(239, 68, 68, 0.045)),
+    var(--background-normal);
+}
+
 .overview-card span,
 .overview-card small {
   overflow: hidden;
@@ -1611,7 +1630,7 @@ ul {
 
 .sync-metrics {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: var(--space-12);
 }
 
@@ -1662,6 +1681,13 @@ ul {
   border-color: rgba(234, 179, 8, 0.45);
   background:
     linear-gradient(0deg, rgba(234, 179, 8, 0.05), rgba(234, 179, 8, 0.05)),
+    var(--background-normal);
+}
+
+.sync-card.status-idle:first-child {
+  border-color: rgba(112, 115, 124, 0.3);
+  background:
+    linear-gradient(0deg, rgba(112, 115, 124, 0.035), rgba(112, 115, 124, 0.035)),
     var(--background-normal);
 }
 

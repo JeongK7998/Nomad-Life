@@ -344,6 +344,7 @@ function renderWorkspaceOverview({ today, health, activityAllocation, captures, 
   const activityMinutes = activityAllocation.summary?.tracked_minutes || activityAllocation.summary?.total_minutes || 0;
   const syncSummary = syncStatus.summary || {};
   const pendingTotal = Number(syncSummary.pending_captures || 0) + Number(syncSummary.pending_workouts || 0);
+  const syncFreshness = syncFreshnessStatus(syncSummary);
   const cards = [
     {
       view: "today",
@@ -384,15 +385,16 @@ function renderWorkspaceOverview({ today, health, activityAllocation, captures, 
     {
       view: "context",
       label: "Sync",
-      value: syncSummary.health || "unknown",
-      detail: `${pendingTotal} pending · ${formatSyncTime(syncSummary.last_publish_at)}`,
+      value: syncFreshness.label,
+      detail: `${pendingTotal} pending · ${syncFreshness.detail}`,
+      status: syncFreshness.status,
     },
   ];
 
   workspaceOverview.replaceChildren(
     ...cards.map((card) => {
       const button = document.createElement("button");
-      button.className = "overview-card";
+      button.className = ["overview-card", card.status ? `status-${card.status}` : ""].filter(Boolean).join(" ");
       button.type = "button";
       button.dataset.overviewView = card.view;
       button.innerHTML = `
@@ -973,6 +975,75 @@ function formatSyncTime(value) {
   }).format(date);
 }
 
+function minutesSince(value) {
+  if (!value) {
+    return null;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return Math.max(0, Math.round((Date.now() - date.getTime()) / 60000));
+}
+
+function formatSyncAge(minutes) {
+  if (minutes === null) {
+    return "not published";
+  }
+  if (minutes < 1) {
+    return "just now";
+  }
+  if (minutes < 60) {
+    return `${minutes}m ago`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return mins ? `${hours}h ${mins}m ago` : `${hours}h ago`;
+}
+
+function syncFreshnessStatus(summary = {}) {
+  const pendingTotal = Number(summary.pending_captures || 0) + Number(summary.pending_workouts || 0);
+  const ageMinutes = minutesSince(summary.last_publish_at);
+  if (summary.last_failure_at) {
+    return {
+      status: "attention",
+      label: "attention",
+      detail: `failure · ${formatSyncTime(summary.last_failure_at)}`,
+      ageMinutes,
+    };
+  }
+  if (pendingTotal > 0) {
+    return {
+      status: "pending",
+      label: "pending",
+      detail: `${formatSyncAge(ageMinutes)} publish`,
+      ageMinutes,
+    };
+  }
+  if (ageMinutes === null || ageMinutes > 60) {
+    return {
+      status: "attention",
+      label: "stale",
+      detail: formatSyncAge(ageMinutes),
+      ageMinutes,
+    };
+  }
+  if (ageMinutes > 15) {
+    return {
+      status: "idle",
+      label: "idle",
+      detail: formatSyncAge(ageMinutes),
+      ageMinutes,
+    };
+  }
+  return {
+    status: "ok",
+    label: "fresh",
+    detail: formatSyncAge(ageMinutes),
+    ageMinutes,
+  };
+}
+
 function colorForArea(area = "") {
   return ACTIVITY_COLORS[area] || ACTIVITY_COLORS.Unclassified;
 }
@@ -1161,13 +1232,14 @@ function renderSyncStatus(payload = {}) {
   const recentEvents = payload.recent_events || [];
   const pendingCaptures = summary.pending_captures ?? "-";
   const pendingWorkouts = summary.pending_workouts ?? "-";
-  const health = summary.health || "unknown";
+  const freshness = syncFreshnessStatus(summary);
   const cards = [
-    ["Status", health, summary.last_failure_at ? `Last failure ${formatSyncTime(summary.last_failure_at)}` : "No recent worker failure"],
+    ["Status", freshness.label, freshness.detail],
     ["Pending Captures", pendingCaptures, "capture_queue"],
     ["Pending Workouts", pendingWorkouts, "workout_queue"],
     ["Last Pull", formatSyncTime(summary.last_pull_at), "queue check"],
     ["Last Publish", formatSyncTime(summary.last_publish_at), "dashboard snapshots"],
+    ["Freshness", formatSyncAge(freshness.ageMinutes), "published snapshot age"],
   ];
 
   const eventRows = recentEvents.slice(0, 5).map((event) => {
@@ -1184,7 +1256,7 @@ function renderSyncStatus(payload = {}) {
   syncStatusList.innerHTML = `
     <div class="sync-metrics">
       ${cards.map(([label, value, detail]) => `
-        <article class="sync-card status-${health}">
+        <article class="sync-card status-${freshness.status}">
           <span>${label}</span>
           <strong>${value}</strong>
           <small>${detail}</small>
