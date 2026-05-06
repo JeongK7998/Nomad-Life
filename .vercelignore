@@ -4,6 +4,8 @@
 .vercel/
 Design System/
 data/
+!web/data/
+!web/data/**
 dashboard/
 reports/
 scripts/__pycache__/
