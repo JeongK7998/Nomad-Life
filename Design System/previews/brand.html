@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brand — Wanted</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 56px 64px 96px; background: #fff; }
+  h1.page { font-size: 56px; line-height: 1.1; letter-spacing: -0.034em; font-weight: 800; margin: 0 0 12px; }
+  p.lede { font-size: 17px; line-height: 1.55; color: var(--label-neutral); max-width: 720px; margin: 0 0 56px; }
+  .group-title { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--label-alternative); margin: 48px 0 16px; font-weight: 600; }
+  .hero { background: var(--coolNeutral-10); color: #fff; padding: 96px 64px; border-radius: 24px; display: flex; align-items: center; justify-content: center; min-height: 280px; margin-bottom: 16px;}
+  .hero img { height: 56px; }
+  .hero.blue { background: var(--primary-normal); }
+  .hero.light { background: var(--background-alternative); color: var(--label-normal); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .card { background: var(--background-alternative); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 200px; }
+  .card.dark { background: var(--coolNeutral-10); color: #fff; }
+  .card.blue { background: var(--primary-normal); color: #fff; }
+  .card img { max-width: 200px; max-height: 56px; object-fit: contain; }
+  .card .label { font-size: 12px; opacity: 0.7; letter-spacing: 0.04em; }
+  .symbol-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .sym { aspect-ratio: 1; border-radius: 24px; display:flex; align-items:center; justify-content:center; }
+  .sym.b { background: var(--primary-normal); }
+  .sym.k { background: var(--coolNeutral-10); }
+  .sym.w { background: #fff; box-shadow: inset 0 0 0 1px var(--line-normal); }
+  .sym img { width: 60%; height: 60%; }
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .rule { background: var(--background-alternative); border-radius: 12px; padding: 24px; }
+  .rule h4 { margin: 0 0 8px; font-size: 14px; }
+  .rule p { margin: 0; font-size: 13px; color: var(--label-neutral); line-height: 1.5; }
+  .rule.do { border-left: 3px solid var(--status-positive); }
+  .rule.dont { border-left: 3px solid var(--status-negative); }
+</style>
+</head>
+<body>
+  <h1 class="page">Brand</h1>
+  <p class="lede">The Wanted mark is a stylized "W → arrow" — a forward motion. The wordmark is set in a custom drawing of Pretendard. Used in three colors only: black, white, and Wanted Blue.</p>
+
+  <div class="hero blue">
+    <img src="../assets/wanted-logotype.svg" alt="Wanted logotype" style="filter:brightness(0) invert(1);">
+  </div>
+
+  <div class="group-title">Logotypes — product family</div>
+  <div class="grid">
+    <div class="card"><img src="../assets/wanted-logotype.svg" alt="Wanted"><div class="label">Wanted — main wordmark</div></div>
+    <div class="card"><img src="../assets/wanted-gigs-logotype.svg" alt="WantedGigs"><div class="label">WantedGigs — freelance</div></div>
+    <div class="card"><img src="../assets/wanted-space-logotype.svg" alt="WantedSpace"><div class="label">WantedSpace — recruiting</div></div>
+    <div class="card"><img src="../assets/wanted-agent-logotype.svg" alt="WantedAgent"><div class="label">WantedAgent — agency</div></div>
+    <div class="card"><img src="../assets/wanted-laas-logotype.svg" alt="Wanted LaaS"><div class="label">Wanted LaaS — login-as-a-service</div></div>
+    <div class="card"><img src="../assets/wanted-oneid.svg" alt="Wanted OneID"><div class="label">Wanted OneID — auth</div></div>
+  </div>
+
+  <div class="group-title">Symbol — across surfaces</div>
+  <div class="symbol-row">
+    <div class="sym b"><img src="../assets/wanted-symbol.svg" style="filter:brightness(0) invert(1)"></div>
+    <div class="sym k"><img src="../assets/wanted-symbol.svg" style="filter:brightness(0) invert(1)"></div>
+    <div class="sym w"><img src="../assets/wanted-symbol.svg"></div>
+    <div class="sym" style="background:var(--background-alternative)"><img src="../assets/wanted-symbol.svg"></div>
+  </div>
+
+  <div class="group-title">Rules</div>
+  <div class="rules">
+    <div class="rule do"><h4>Do — keep clearspace ≥ symbol height</h4><p>The symbol's height defines the minimum padding around any logo. No element — type, image, or container edge — enters this zone.</p></div>
+    <div class="rule do"><h4>Do — use the three approved colors</h4><p>Black (#171719), white, and Wanted Blue (#0066FF) only. The mark may sit on a photographic background only when contrast exceeds 4.5 : 1.</p></div>
+    <div class="rule dont"><h4>Don't — gradient, outline, or rotate</h4><p>The mark is a single solid colour. No gradients, drop-shadows, outlines, rotations, or stretching.</p></div>
+    <div class="rule dont"><h4>Don't — recolour the wordmark</h4><p>If you need a tinted logo for a marketing surface, use the symbol on a tinted background — never recolour the wordmark itself.</p></div>
+  </div>
+
+</body>
+</html>

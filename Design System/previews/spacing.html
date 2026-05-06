@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spacing — Wanted</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 56px 64px 96px; background: #fff; }
+  h1.page { font-size: 56px; line-height: 1.1; letter-spacing: -0.034em; font-weight: 800; margin: 0 0 12px; }
+  p.lede { font-size: 17px; line-height: 1.55; color: var(--label-neutral); max-width: 720px; margin: 0 0 56px; }
+  .group-title { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--label-alternative); margin: 48px 0 16px; font-weight: 600; }
+  .scale-row { display: grid; grid-template-columns: 80px 1fr 80px; gap: 24px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line-alternative); }
+  .scale-row .label { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .scale-row .bar { height: 16px; background: var(--primary-normal); border-radius: 2px; }
+  .scale-row .px { font-size: 11px; color: var(--label-alternative); text-align: right; font-variant-numeric: tabular-nums; }
+  .radii { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+  .radii .r { aspect-ratio: 1; background: var(--background-alternative); border: 1px solid var(--line-normal); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .radii .r .v { font-size: 13px; font-weight: 600; }
+  .radii .r .n { font-size: 11px; color: var(--label-alternative); }
+  .shadows { display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px; padding: 48px; background: var(--background-alternative); border-radius: 16px; }
+  .shadows .s { aspect-ratio: 1; background: #fff; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .shadows .s .v { font-size: 12px; font-weight: 600; }
+  .shadows .s .n { font-size: 10px; color: var(--label-alternative); }
+  .s.xs { box-shadow: var(--shadow-emphasize-xsmall); }
+  .s.sm { box-shadow: var(--shadow-emphasize-small); }
+  .s.md { box-shadow: var(--shadow-emphasize-medium); }
+  .s.lg { box-shadow: var(--shadow-emphasize-large); }
+  .s.xl { box-shadow: var(--shadow-emphasize-xlarge); }
+</style>
+</head>
+<body>
+  <h1 class="page">Spacing</h1>
+  <p class="lede">A 4-pt grid with a 2 px micro step for hairline relationships. Most controls land at 8 / 12 / 16; major layout rhythm uses 24 / 32 / 48 / 64.</p>
+
+  <div class="group-title">Scale</div>
+  <div id="scale"></div>
+
+  <div class="group-title">Radius</div>
+  <div class="radii" id="radii"></div>
+
+  <div class="group-title">Elevation</div>
+  <div class="shadows">
+    <div class="s xs"><div class="v">XSmall</div><div class="n">subtle outline</div></div>
+    <div class="s sm"><div class="v">Small</div><div class="n">menu / chip</div></div>
+    <div class="s md"><div class="v">Medium</div><div class="n">card popover</div></div>
+    <div class="s lg"><div class="v">Large</div><div class="n">dropdown</div></div>
+    <div class="s xl"><div class="v">XLarge</div><div class="n">modal</div></div>
+  </div>
+
+<script>
+const sizes = [2,4,6,8,10,12,16,20,24,32,40,48,64,96,128];
+const sEl = document.getElementById('scale');
+sizes.forEach(s => sEl.insertAdjacentHTML('beforeend', `<div class="scale-row"><div class="label">space-${s}</div><div class="bar" style="width:${s}px"></div><div class="px">${s}px</div></div>`));
+const radii = [['2px',2],['4px',4],['8px',8],['12px',12],['16px',16],['24px',24]];
+const rEl = document.getElementById('radii');
+radii.forEach(([n,v]) => rEl.insertAdjacentHTML('beforeend', `<div class="r" style="border-radius:${v}px"><div class="v">${v}</div><div class="n">radius-${v}</div></div>`));
+</script>
+</body>
+</html>

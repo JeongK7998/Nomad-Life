@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Colors — Wanted</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 56px 64px 96px; background: #fff; }
+  h1.page { font-size: 56px; line-height: 1.1; letter-spacing: -0.034em; font-weight: 800; margin: 0 0 12px; }
+  p.lede { font-size: 17px; line-height: 1.55; color: var(--label-neutral); max-width: 720px; margin: 0 0 56px; }
+  .group-title { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--label-alternative); margin: 48px 0 16px; font-weight: 600; }
+  .ramp { display: grid; grid-template-columns: repeat(13, 1fr); gap: 4px; }
+  .swatch { aspect-ratio: 1; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; font-size: 10px; line-height: 1.2; font-variant-numeric: tabular-nums; border: 1px solid rgba(0,0,0,0.04); }
+  .swatch .v { font-weight: 600; opacity: 0.85; }
+  .swatch .h { opacity: 0.6; font-size: 9px; }
+  .ramp-label { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .ramp-label small { color: var(--label-alternative); font-weight: 500; }
+  .semantic-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .sem { padding: 18px; border-radius: 12px; border: 1px solid var(--line-neutral); background: var(--background-normal); }
+  .sem .chip { width: 100%; height: 56px; border-radius: 8px; margin-bottom: 12px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04); }
+  .sem .name { font-size: 13px; font-weight: 600; color: var(--label-normal); }
+  .sem .value { font-size: 11px; color: var(--label-alternative); font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--line-neutral); }
+  .pair > div { padding: 28px 24px; }
+  .pair .light { background: #fff; color: #171719; }
+  .pair .dark { background: #171719; color: #fff; }
+  .pair h3 { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
+  .pair p { margin: 0; font-size: 13px; opacity: 0.7; }
+  .brand-block { background: #0066FF; color: #fff; padding: 64px; border-radius: 24px; margin-bottom: 16px; display: flex; align-items: end; justify-content: space-between; gap: 32px; }
+  .brand-block .lg { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 0.95; }
+  .brand-block .meta { font-size: 13px; opacity: 0.85; text-align: right; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <h1 class="page">Colors</h1>
+  <p class="lede">A near-monochrome system. Cool neutrals carry 90 % of the surface; brand blue is reserved for primary action and identity. Three status colors. Every semantic token has a paired Light / Dark value.</p>
+
+  <div class="brand-block">
+    <div class="lg">#0066FF</div>
+    <div class="meta">Brand Primary — Wanted Blue<br>Buttons · links · brand moments only<br>WCAG AA on white at 14 px+</div>
+  </div>
+
+  <div class="group-title">Atomic ramps</div>
+
+  <div class="ramp-label">Cool Neutral <small>The workhorse — text, backgrounds, lines</small></div>
+  <div class="ramp" id="cn"></div>
+
+  <div class="ramp-label" style="margin-top:32px">Blue <small>Brand & primary action</small></div>
+  <div class="ramp" id="blue"></div>
+
+  <div class="ramp-label" style="margin-top:32px">Status <small>Positive · Cautionary · Negative</small></div>
+  <div class="ramp" style="grid-template-columns: repeat(15, 1fr);" id="status"></div>
+
+  <div class="ramp-label" style="margin-top:32px">Accent ramps <small>Sparingly — illustrations, marketing, tags</small></div>
+  <div class="ramp" style="grid-template-columns: repeat(10, 1fr);" id="accent"></div>
+
+  <div class="group-title">Semantic — Label</div>
+  <div class="semantic-grid">
+    <div class="sem"><div class="chip" style="background:var(--label-normal)"></div><div class="name">label / normal</div><div class="value">#171719 · text default</div></div>
+    <div class="sem"><div class="chip" style="background:var(--label-neutral)"></div><div class="name">label / neutral</div><div class="value">88% · body</div></div>
+    <div class="sem"><div class="chip" style="background:var(--label-alternative)"></div><div class="name">label / alternative</div><div class="value">61% · meta</div></div>
+    <div class="sem"><div class="chip" style="background:var(--label-assistive)"></div><div class="name">label / assistive</div><div class="value">28% · placeholder</div></div>
+  </div>
+
+  <div class="group-title">Semantic — Background & line</div>
+  <div class="semantic-grid">
+    <div class="sem"><div class="chip" style="background:var(--background-normal); box-shadow: inset 0 0 0 1px var(--line-normal)"></div><div class="name">background / normal</div><div class="value">#FFFFFF</div></div>
+    <div class="sem"><div class="chip" style="background:var(--background-alternative)"></div><div class="name">background / alternative</div><div class="value">#F7F7F8 · cards on cards</div></div>
+    <div class="sem"><div class="chip" style="background:#fff; box-shadow: inset 0 0 0 1px var(--line-normal)"></div><div class="name">line / normal</div><div class="value">22% · default border</div></div>
+    <div class="sem"><div class="chip" style="background:#fff; box-shadow: inset 0 0 0 1px var(--line-alternative)"></div><div class="name">line / alternative</div><div class="value">8% · subtle divider</div></div>
+  </div>
+
+  <div class="group-title">Semantic — Status</div>
+  <div class="semantic-grid">
+    <div class="sem"><div class="chip" style="background:var(--status-positive)"></div><div class="name">status / positive</div><div class="value">#00BF40</div></div>
+    <div class="sem"><div class="chip" style="background:var(--status-cautionary)"></div><div class="name">status / cautionary</div><div class="value">#FF9200</div></div>
+    <div class="sem"><div class="chip" style="background:var(--status-negative)"></div><div class="name">status / negative</div><div class="value">#FF4242</div></div>
+    <div class="sem"><div class="chip" style="background:var(--primary-normal)"></div><div class="name">primary / normal</div><div class="value">#0066FF</div></div>
+  </div>
+
+  <div class="group-title" style="margin-top:48px">Light & Dark</div>
+  <div class="pair">
+    <div class="light">
+      <h3>Light theme — default</h3>
+      <p>Background #FFFFFF · Label #171719 · Primary #0066FF</p>
+    </div>
+    <div class="dark">
+      <h3>Dark theme — [data-theme="dark"]</h3>
+      <p>Background #171719 · Label #FFFFFF · Primary #3385FF</p>
+    </div>
+  </div>
+
+<script>
+const cn = [99,98,96,94,92,85,75,65,55,50,40,32,25,22,20,18,15,12,10,8,5];
+const cnHex = ["#F7F7F8","#F4F4F5","#EAEBEC","#E1E2E4","#DBDCDF","#C2C4C8","#AEB0B6","#989BA2","#878A93","#70737C","#5A5C63","#46474C","#37383C","#333438","#2E2F33","#292A2D","#212225","#1B1C1E","#171719","#141415","#0F0F10"];
+const blue = [99,95,85,75,65,55,50,45,40,35,30,22,15,8];
+const blueHex = ["#F7FBFF","#EAF2FE","#C9DEFE","#9EC5FF","#69A5FF","#4F95FF","#3385FF","#1A75FF","#0066FF","#005EEB","#0054D1","#003E9C","#002966","#001536"];
+const cnEl = document.getElementById('cn');
+// Show 13 representative steps
+[99,96,92,75,55,40,32,22,18,15,12,10,5].forEach(step => {
+  const i = cn.indexOf(step); const hex = cnHex[i];
+  const dark = step <= 50;
+  cnEl.insertAdjacentHTML('beforeend', `<div class="swatch" style="background:${hex}; color:${dark?'#fff':'#171719'}"><div class="v">CN ${step}</div><div class="h">${hex}</div></div>`);
+});
+const blueEl = document.getElementById('blue');
+[99,95,85,75,65,55,45,40,35,30,22,15,8].forEach(step => {
+  const i = blue.indexOf(step); const hex = blueHex[i];
+  const dark = step <= 45;
+  blueEl.insertAdjacentHTML('beforeend', `<div class="swatch" style="background:${hex}; color:${dark?'#fff':'#171719'}"><div class="v">B ${step}</div><div class="h">${hex}</div></div>`);
+});
+const status = [
+  ["Red 95","#FEECEC",false],["Red 75","#FFB5B5",false],["Red 55","#FF6363",true],["Red 50","#FF4242",true],["Red 30","#B20C0C",true],
+  ["Green 95","#D9FFE6",false],["Green 75","#7DF5A5",false],["Green 55","#1ED45A",true],["Green 50","#00BF40",true],["Green 30","#006E25",true],
+  ["Orange 95","#FFF1DD",false],["Orange 75","#FFD08A",false],["Orange 55","#FFA133",true],["Orange 50","#FF9200",true],["Orange 39","#D17600",true],
+];
+const sEl = document.getElementById('status');
+status.forEach(([n,h,d]) => sEl.insertAdjacentHTML('beforeend', `<div class="swatch" style="background:${h}; color:${d?'#fff':'#171719'}"><div class="v">${n}</div><div class="h">${h}</div></div>`));
+const accents = [
+  ["Cyan","#00BDDE"],["Light Blue","#00AEFF"],["Violet","#6541F2"],["Purple","#CB59FF"],["Pink","#F553DA"],
+  ["Lime","#58CF04"],["Red-Orange","#FF5E00"],["Orange","#FF9200"],["Green","#00BF40"],["Red","#FF4242"]
+];
+const aEl = document.getElementById('accent');
+accents.forEach(([n,h]) => aEl.insertAdjacentHTML('beforeend', `<div class="swatch" style="background:${h}; color:#fff"><div class="v">${n}</div><div class="h">${h}</div></div>`));
+</script>
+</body>
+</html>

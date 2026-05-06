@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Workout" />
+    <meta name="theme-color" content="#171719" />
+    <title>Workout Quick Input</title>
+    <script>
+      if (window.location.protocol === "file:") {
+        window.location.replace("http://127.0.0.1:4174/web/workout-quick.html");
+      }
+    </script>
+    <link rel="stylesheet" href="design-tokens.css?v=20260505-workout-quick" />
+    <link rel="stylesheet" href="workout-quick.css?v=20260505-workout-quick" />
+  </head>
+  <body>
+    <main class="quick-shell">
+      <header class="quick-header">
+        <div>
+          <p class="eyebrow">Nomad Health</p>
+          <h1>Workout Quick</h1>
+        </div>
+        <a href="/web/#health" aria-label="Health Dashboard로 이동">↗</a>
+      </header>
+
+      <section class="quick-card">
+        <div class="quick-meta">
+          <button id="time-button" class="dark-button" type="button">현재 시간</button>
+          <p id="time-status">현재 시간 적용됨</p>
+        </div>
+        <div id="time-panel" class="time-panel" hidden>
+          <label>
+            <span>날짜</span>
+            <input id="start-date" type="date" />
+          </label>
+          <label>
+            <span>시간</span>
+            <input id="start-time" type="time" />
+          </label>
+          <button id="apply-time" type="button">완료</button>
+        </div>
+
+        <form id="quick-form" class="quick-form">
+          <div class="two-grid">
+            <label>
+              <span>부위</span>
+              <select id="muscle-select">
+                <option value="chest">가슴</option>
+                <option value="back">등</option>
+                <option value="legs">하체</option>
+                <option value="shoulders">어깨</option>
+                <option value="arms">팔</option>
+                <option value="core">코어</option>
+                <option value="full_body">전신</option>
+                <option value="other">기타</option>
+              </select>
+            </label>
+            <label>
+              <span>운동</span>
+              <select id="exercise-select"></select>
+            </label>
+          </div>
+
+          <div class="tool-row">
+            <button id="favorite-button" class="ghost-button" type="button" aria-label="좋아요">♡</button>
+            <button id="info-button" class="ghost-button" type="button" aria-label="운동 정보">i</button>
+            <p id="latest-guide">이전 운동 기록이 있으면 여기에 표시됩니다.</p>
+          </div>
+
+          <div class="number-row">
+            <label>
+              <span>무게 kg</span>
+              <input id="weight-input" type="number" inputmode="decimal" min="0" step="0.5" value="60" />
+            </label>
+            <label>
+              <span>반복</span>
+              <input id="reps-input" type="number" inputmode="numeric" min="1" step="1" value="10" />
+            </label>
+            <label>
+              <span>RPE</span>
+              <input id="rpe-input" type="number" inputmode="decimal" min="1" max="10" step="0.5" placeholder="선택" />
+            </label>
+          </div>
+
+          <button id="add-set" class="primary-button" type="button">Add Set</button>
+          <p id="quick-status" role="status"></p>
+
+          <div id="draft-list" class="draft-list"></div>
+
+          <label class="note-field">
+            <span>메모</span>
+            <textarea id="note-input" rows="3" placeholder="기구 상태, 통증, 컨디션, 자세 메모"></textarea>
+          </label>
+
+          <button id="save-workout" class="dark-button save-button" type="submit">End Workout & Save</button>
+        </form>
+      </section>
+    </main>
+
+    <dialog id="exercise-dialog" class="quick-dialog">
+      <form method="dialog">
+        <header>
+          <div>
+            <p class="eyebrow">Exercise</p>
+            <h2 id="dialog-title">Exercise</h2>
+          </div>
+          <button class="ghost-button" type="submit">닫기</button>
+        </header>
+        <div id="dialog-content"></div>
+      </form>
+    </dialog>
+
+    <script src="workout-quick.js?v=20260505-workout-quick" type="module"></script>
+  </body>
+</html>

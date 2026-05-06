@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nomad Dashboard</title>
+    <script>
+      if (window.location.protocol === "file:") {
+        window.location.replace(`http://127.0.0.1:4174/web/${window.location.hash || ""}`);
+      }
+    </script>
+    <link rel="stylesheet" href="design-tokens.css?v=20260506-sync-status" />
+    <link rel="stylesheet" href="styles.css?v=20260506-sync-status" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div>
+          <p class="eyebrow">Hermes Dashboard</p>
+          <h1>Nomad Life</h1>
+        </div>
+        <nav aria-label="Dashboard workspaces">
+          <a href="#today" data-view-link="today">Today</a>
+          <a href="#capture" data-view-link="capture">Capture</a>
+          <a href="#health" data-view-link="health">Health</a>
+          <a href="#activity" data-view-link="activity">Activity</a>
+          <a href="#finance" data-view-link="finance">Finance</a>
+          <a href="#context" data-view-link="context">Context</a>
+          <a href="#council" data-view-link="council">Council</a>
+          <a href="#reports" data-view-link="reports">Reports</a>
+        </nav>
+      </aside>
+
+      <main>
+        <section class="workspace-overview" aria-label="Dashboard overview">
+          <div id="workspace-overview" class="overview-grid"></div>
+        </section>
+
+        <div class="workspace-view" data-view="capture" id="capture">
+        <section class="section capture-section">
+          <div class="section-heading">
+            <p class="eyebrow">Input</p>
+            <h2>Quick Capture</h2>
+          </div>
+          <form id="capture-form" class="capture-form">
+            <textarea id="capture-text" name="capture" rows="4" placeholder="오늘의 작업, 식사, 지출, 컨디션을 짧게 남기기"></textarea>
+            <div class="form-row">
+              <button type="submit">Capture</button>
+              <button id="sync-inbox-button" class="button-secondary" type="button">Sync Inbox</button>
+              <p id="capture-status" role="status"></p>
+            </div>
+          </form>
+        </section>
+
+        <section id="captures" class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Data</p>
+            <h2>Recent Captures</h2>
+          </div>
+          <div id="captures-list" class="captures-list"></div>
+        </section>
+        </div>
+
+        <div class="workspace-view" data-view="health" id="health">
+          <div class="health-workspace">
+            <section id="health-dashboard" class="section health-dashboard-section">
+              <div class="section-heading">
+                <p class="eyebrow">Health Dashboard</p>
+                <h2>Muscle Schedule</h2>
+              </div>
+              <div id="health-summary" class="metric-strip"></div>
+              <div class="routine-panel">
+                <div class="section-heading with-action">
+                  <div>
+                    <p class="eyebrow">Workout Routine</p>
+                    <h3>루틴 카드</h3>
+                  </div>
+                  <div class="routine-nav">
+                    <button id="routine-prev" class="button-ghost" type="button" aria-label="이전 루틴">‹</button>
+                    <button id="routine-next" class="button-ghost" type="button" aria-label="다음 루틴">›</button>
+                  </div>
+                </div>
+                <div id="routine-filters" class="routine-filters"></div>
+                <div id="routine-track" class="routine-track"></div>
+              </div>
+              <div class="exercise-history-panel">
+                <div class="section-heading">
+                  <p class="eyebrow">Exercise History</p>
+                  <h3 id="exercise-history-title">운동을 선택하세요</h3>
+                </div>
+                <div id="exercise-history" class="exercise-history"></div>
+              </div>
+              <div id="muscle-heatmap" class="muscle-heatmap"></div>
+              <div class="muscle-summary-panel">
+                <h3 class="panel-title">Muscle Summary</h3>
+                <div id="muscle-summary" class="muscle-map"></div>
+              </div>
+              <h3 class="panel-title">Selected Detail</h3>
+              <div id="muscle-detail" class="captures-list"></div>
+              <div class="health-decision-grid">
+                <div>
+                  <h3 class="panel-title">Readiness</h3>
+                  <div id="health-readiness" class="health-readiness"></div>
+                </div>
+                <div>
+                  <h3 class="panel-title">Today Candidates</h3>
+                  <div id="health-recommendations" class="health-recommendations"></div>
+                </div>
+              </div>
+            </section>
+
+            <section id="workout" class="section workout-section">
+              <div class="section-heading workout-heading">
+                <div>
+                  <p class="eyebrow">Quick Log</p>
+                  <h2>Workout Detail</h2>
+                  <p id="workout-time-status" class="section-subtext">현재 시간 적용됨</p>
+                </div>
+                <a class="quick-link" href="/web/workout-quick.html">Quick</a>
+              </div>
+              <form id="workout-form" class="workout-form">
+                <div class="form-grid form-grid-compact workout-input-grid">
+                  <div class="time-confirm">
+                    <span>시작 시간</span>
+                    <button id="open-workout-time" class="button-secondary" type="button">날짜/시간 선택</button>
+                    <div id="workout-time-popover" class="time-popover" hidden>
+                      <label>
+                        <span>날짜</span>
+                        <input id="workout-start-date" name="started_date" type="date" />
+                      </label>
+                      <label>
+                        <span>시간</span>
+                        <input id="workout-start-time" name="started_time" type="time" />
+                      </label>
+                      <button id="apply-workout-time" type="button">완료</button>
+                    </div>
+                  </div>
+                  <label>
+                    <span>부위</span>
+                    <select id="workout-muscle" name="muscle">
+                      <option value="chest">가슴</option>
+                      <option value="back">등</option>
+                      <option value="legs">하체</option>
+                      <option value="shoulders">어깨</option>
+                      <option value="arms">팔</option>
+                      <option value="core">코어</option>
+                      <option value="full_body">전신</option>
+                      <option value="other">기타</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>운동</span>
+                    <select id="workout-exercise" name="exercise"></select>
+                  </label>
+                  <input id="exercise-search" name="exercise_search" type="hidden" />
+                  <div class="exercise-actions">
+                    <button id="favorite-exercise" class="button-ghost" type="button" aria-label="좋아요">♡</button>
+                    <button id="exercise-detail" class="button-ghost" type="button" aria-label="운동 정보">i</button>
+                  </div>
+                  <p id="latest-exercise-guide" class="latest-exercise-guide">이전 운동 기록이 있으면 여기에 표시됩니다.</p>
+                  <div class="workout-number-row">
+                    <label>
+                      <span>무게 kg</span>
+                      <input id="workout-weight" name="weight" type="number" inputmode="decimal" min="0" step="0.5" value="60" />
+                    </label>
+                    <label>
+                      <span>반복</span>
+                      <input id="workout-reps" name="reps" type="number" inputmode="numeric" min="1" step="1" value="10" />
+                    </label>
+                    <label>
+                      <span>RPE</span>
+                      <input id="workout-rpe" name="rpe" type="number" inputmode="decimal" min="1" max="10" step="0.5" placeholder="선택" />
+                    </label>
+                  </div>
+                </div>
+                <div class="form-row add-set-row">
+                  <button id="add-workout-set" type="button">Add Set</button>
+                  <p id="workout-status" role="status"></p>
+                </div>
+                <div id="workout-set-list" class="workout-draft-list"></div>
+                <label class="workout-note-field">
+                  <span>메모</span>
+                  <textarea id="workout-note" name="note" rows="3" placeholder="기구 상태, 통증, 컨디션, 자세 메모"></textarea>
+                </label>
+                <div class="workout-save-row">
+                  <button id="save-workout-session" class="button-secondary" type="submit">End Workout & Save</button>
+                </div>
+              </form>
+            </section>
+          </div>
+        </div>
+
+        <dialog id="exercise-dialog" class="exercise-dialog">
+          <form method="dialog">
+            <div class="dialog-heading">
+              <div>
+                <p class="eyebrow">Exercise Library</p>
+                <h2 id="exercise-dialog-title">Exercise</h2>
+              </div>
+              <button class="button-ghost" type="submit">Close</button>
+            </div>
+            <div id="exercise-dialog-content" class="exercise-dialog-content"></div>
+          </form>
+        </dialog>
+
+        <div class="workspace-view active" data-view="today" id="today">
+        <section class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Today Dashboard</p>
+            <h2 id="today-date">Today</h2>
+          </div>
+          <p id="summary" class="summary"></p>
+          <div class="three-column">
+            <div>
+              <h3>Focus</h3>
+              <ul id="focus-list"></ul>
+            </div>
+            <div>
+              <h3>Let Go</h3>
+              <ul id="let-go-list"></ul>
+            </div>
+            <div>
+              <h3>Missions</h3>
+              <ul id="missions-list"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="life" class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Balance</p>
+            <h2>Life Dashboard</h2>
+          </div>
+          <div id="life-bars" class="life-bars"></div>
+        </section>
+        </div>
+
+        <div class="workspace-view" data-view="finance" id="finance">
+        <section id="expense-candidates" class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Finance Review</p>
+            <h2>Imported Spending Signals</h2>
+          </div>
+          <div id="expense-candidates-list" class="captures-list"></div>
+        </section>
+        </div>
+
+        <div class="workspace-view" data-view="reports" id="reports">
+        <section id="hermes" class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Hermes</p>
+            <h2>Coordinator Draft</h2>
+          </div>
+          <div id="hermes-draft" class="hermes-draft"></div>
+        </section>
+        </div>
+
+        <div class="workspace-view" data-view="context" id="context">
+        <section id="sync-status" class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Cloud-Light</p>
+            <h2>Sync Status</h2>
+          </div>
+          <div id="sync-status-list" class="sync-status-grid"></div>
+        </section>
+
+        <section id="local-context" class="section">
+          <div class="section-heading with-action">
+            <div>
+              <p class="eyebrow">Local Apps</p>
+              <h2>Local Context</h2>
+            </div>
+            <button id="sync-local-apps-button" class="button-secondary" type="button">Refresh</button>
+          </div>
+          <div id="local-context-list" class="context-grid"></div>
+        </section>
+        </div>
+
+        <div class="workspace-view" data-view="council" id="council">
+        <section class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Synthesis</p>
+            <h2>Agent Council</h2>
+          </div>
+          <div id="agent-council" class="council-grid"></div>
+        </section>
+
+        <section id="notifications" class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Notification</p>
+            <h2>Notification Candidates</h2>
+          </div>
+          <div id="notifications-list" class="actions-list"></div>
+        </section>
+
+        <section id="actions" class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Approval</p>
+            <h2>Action Center</h2>
+          </div>
+          <div id="actions-list" class="actions-list"></div>
+        </section>
+        </div>
+
+        <div class="workspace-view" data-view="activity" id="activity">
+        <section class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Time Allocation</p>
+            <h2>Activity Time</h2>
+          </div>
+          <div id="activity-summary" class="metric-strip"></div>
+          <h3 class="panel-title">Daily Share of 24h</h3>
+          <div id="activity-bars" class="life-bars"></div>
+          <h3 class="panel-title">Monthly Share</h3>
+          <div id="activity-month-bars" class="life-bars"></div>
+          <h3 class="panel-title">Cumulative Time</h3>
+          <div id="activity-cumulative" class="cumulative-list"></div>
+          <h3 class="panel-title">Candidate Sessions</h3>
+          <div id="activity-sessions" class="captures-list"></div>
+        </section>
+        </div>
+      </main>
+    </div>
+
+    <script src="app.js?v=20260506-sync-status" type="module"></script>
+  </body>
+</html>

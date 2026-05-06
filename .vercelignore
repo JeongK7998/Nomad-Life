@@ -1,0 +1,12 @@
+.env
+.env.*
+.git/
+.vercel/
+Design System/
+data/
+dashboard/
+reports/
+scripts/__pycache__/
+scripts/local_app_bridges/calendar_context
+*.pyc
+.DS_Store

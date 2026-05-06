@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wanted — Career app</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; background: var(--background-alternative); font-family: var(--font-sans); }
+  .page { max-width: 1280px; margin: 0 auto; background: #fff; min-height: 100vh; }
+
+  /* Top nav */
+  .topnav { display: flex; align-items: center; gap: 32px; padding: 0 32px; height: 64px; border-bottom: 1px solid var(--line-alternative); position: sticky; top: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(8px); z-index: 10; }
+  .topnav .logo { height: 22px; }
+  .topnav nav { display: flex; gap: 28px; flex: 1; }
+  .topnav nav a { font-size: 15px; font-weight: 600; color: var(--label-normal); text-decoration: none; }
+  .topnav nav a.muted { color: var(--label-alternative); font-weight: 500; }
+  .topnav .right { display: flex; align-items: center; gap: 12px; }
+  .icon-btn { width: 36px; height: 36px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 0; cursor: pointer; }
+  .icon-btn:hover { background: var(--fill-normal); }
+  .icon-btn img { width: 22px; height: 22px; opacity: 0.85; }
+  .pill { padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 600; background: var(--coolNeutral-10); color: #fff; cursor: pointer; }
+
+  /* Filter row */
+  .filter-row { padding: 20px 32px; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid var(--line-alternative); overflow-x: auto; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; height: 36px; border-radius: 9999px; font-size: 13px; font-weight: 500; background: #fff; box-shadow: inset 0 0 0 1px var(--line-normal); color: var(--label-normal); cursor: pointer; white-space: nowrap; }
+  .chip.active { background: var(--coolNeutral-10); color: #fff; box-shadow: none; }
+  .chip img { width: 14px; height: 14px; opacity: 0.7; }
+
+  /* Content */
+  main { padding: 32px; display: grid; grid-template-columns: 1fr 320px; gap: 32px; }
+
+  .hero-promo { grid-column: 1 / -1; background: linear-gradient(120deg, #001536 0%, #003E9C 60%, #0066FF 100%); color: #fff; border-radius: 20px; padding: 48px; display: flex; align-items: center; justify-content: space-between; gap: 32px; margin-bottom: 16px; }
+  .hero-promo h2 { margin: 0 0 8px; font-size: 32px; font-weight: 800; letter-spacing: -0.025em; }
+  .hero-promo p { margin: 0 0 20px; font-size: 15px; opacity: 0.85; max-width: 380px; line-height: 1.55; }
+  .hero-promo .stat { display: flex; gap: 32px; }
+  .hero-promo .stat div { font-size: 12px; opacity: 0.7; }
+  .hero-promo .stat b { display: block; font-size: 28px; font-weight: 800; opacity: 1; letter-spacing: -0.02em; }
+  .hero-promo button { background: #fff; color: var(--label-normal); border: 0; height: 44px; padding: 0 20px; border-radius: 8px; font-weight: 700; font-family: inherit; font-size: 14px; cursor: pointer; }
+
+  .section-title { display: flex; justify-content: space-between; align-items: end; margin: 16px 0 16px; }
+  .section-title h3 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.019em; }
+  .section-title a { font-size: 13px; color: var(--label-alternative); text-decoration: none; }
+
+  .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .job-card { background: #fff; border: 1px solid var(--line-neutral); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; cursor: pointer; transition: all 0.12s; }
+  .job-card:hover { border-color: var(--label-normal); transform: translateY(-2px); box-shadow: var(--shadow-emphasize-small); }
+  .job-card .top { display: flex; align-items: center; gap: 10px; }
+  .job-card .logo { width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; }
+  .job-card .logo.toss { background: linear-gradient(135deg, #0066FF, #003E9C); }
+  .job-card .logo.kakao { background: linear-gradient(135deg, #FFD800, #FFA500); }
+  .job-card .logo.naver { background: linear-gradient(135deg, #00BF40, #007F2A); }
+  .job-card .logo.coupang { background: linear-gradient(135deg, #FF4242, #B20C0C); }
+  .job-card .company { font-size: 13px; color: var(--label-alternative); font-weight: 500; }
+  .job-card .company b { color: var(--label-normal); font-weight: 700; margin-right: 4px; }
+  .job-card h4 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.35; }
+  .job-card .meta { font-size: 12px; color: var(--label-alternative); }
+  .job-card footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--line-alternative); }
+  .job-card .reward { font-size: 13px; font-weight: 700; color: var(--primary-normal); }
+  .badge { display: inline-flex; align-items: center; padding: 0 6px; height: 18px; border-radius: 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.025em; }
+  .badge.new { background: rgba(0,102,255,0.12); color: var(--primary-normal); }
+  .badge.hot { background: rgba(255,66,66,0.12); color: var(--status-negative); }
+  .badge.due { background: var(--coolNeutral-10); color: #fff; }
+
+  /* Sidebar */
+  aside { display: flex; flex-direction: column; gap: 16px; }
+  .resume-card { background: var(--coolNeutral-10); color: #fff; border-radius: 16px; padding: 24px; }
+  .resume-card .label { font-size: 12px; opacity: 0.7; letter-spacing: 0.05em; text-transform: uppercase; }
+  .resume-card h4 { margin: 8px 0 4px; font-size: 18px; }
+  .resume-card .progress { height: 6px; background: rgba(255,255,255,0.12); border-radius: 9999px; margin-top: 16px; overflow: hidden; }
+  .resume-card .progress > div { height: 100%; background: var(--primary-normal); width: 72%; border-radius: 9999px; }
+  .resume-card .pct { font-size: 12px; opacity: 0.7; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .recruit-card { background: #fff; border: 1px solid var(--line-neutral); border-radius: 16px; padding: 20px; }
+  .recruit-card h4 { margin: 0 0 12px; font-size: 15px; font-weight: 700; }
+  .applicant { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line-alternative); }
+  .applicant:last-child { border: 0; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg,#4F95FF,#0066FF); color: #fff; font-weight: 700; font-size: 13px; display:inline-flex; align-items:center; justify-content:center; }
+  .applicant .meta { flex: 1; }
+  .applicant .name { font-size: 14px; font-weight: 600; }
+  .applicant .role { font-size: 12px; color: var(--label-alternative); }
+  .applicant .score { font-size: 13px; font-weight: 700; color: var(--primary-normal); font-variant-numeric: tabular-nums; }
+
+  /* Bottom mobile nav (preview only) */
+</style>
+</head>
+<body>
+  <div class="page">
+    <header class="topnav">
+      <img class="logo" src="../assets/wanted-logotype.svg" alt="Wanted">
+      <nav>
+        <a href="#">홈</a>
+        <a href="#">채용</a>
+        <a href="#" class="muted">이벤트</a>
+        <a href="#" class="muted">직군별 연봉</a>
+        <a href="#" class="muted">이력서</a>
+        <a href="#" class="muted">커뮤니티</a>
+      </nav>
+      <div class="right">
+        <button class="icon-btn"><img src="../assets/icons/search.svg"></button>
+        <button class="icon-btn"><img src="../assets/icons/bookmark.svg"></button>
+        <button class="icon-btn"><img src="../assets/icons/bell.svg"></button>
+        <span class="pill">기업 서비스</span>
+      </div>
+    </header>
+
+    <div class="filter-row">
+      <span class="chip active">전체 152</span>
+      <span class="chip">개발</span>
+      <span class="chip">디자인</span>
+      <span class="chip">기획·전략</span>
+      <span class="chip">마케팅·광고</span>
+      <span class="chip">영업·제휴</span>
+      <span class="chip">HR·총무</span>
+      <span class="chip">데이터</span>
+      <span class="chip"><img src="../assets/icons/filter.svg">필터</span>
+    </div>
+
+    <main>
+      <section style="grid-column: 1 / -1;">
+        <div class="hero-promo">
+          <div>
+            <h2>합격하면 축하금까지.</h2>
+            <p>원티드를 통해 지원하고 합격하면 채용 보상금을 드려요. 최근 3개월 평균 응답 시간은 2.3일입니다.</p>
+            <button>혜택 자세히 보기</button>
+          </div>
+          <div class="stat">
+            <div><b>1,247</b>현재 채용 중</div>
+            <div><b>2.3<small style="font-size:14px; opacity:0.6">일</small></b>평균 응답</div>
+            <div><b>94%</b>합격 알림 수신</div>
+          </div>
+        </div>
+
+        <div class="section-title"><h3>지금 추천하는 공고</h3><a href="#">모두 보기 →</a></div>
+        <div class="cards">
+          <article class="job-card">
+            <div class="top"><div class="logo toss"></div><div><div class="company"><b>토스</b>금융 · 1,000+</div></div></div>
+            <h4>Senior Frontend Engineer (Web)</h4>
+            <div class="meta">서울 강남구 · 5년+ · 정규직</div>
+            <footer><span class="reward">합격축하금 1,500,000원</span><span class="badge new">NEW</span></footer>
+          </article>
+          <article class="job-card">
+            <div class="top"><div class="logo kakao"></div><div><div class="company"><b>카카오</b>플랫폼 · 5,000+</div></div></div>
+            <h4>Product Designer · Pay 서비스</h4>
+            <div class="meta">성남시 분당구 · 3년+ · 정규직</div>
+            <footer><span class="reward">합격축하금 1,000,000원</span><span class="badge hot">HOT</span></footer>
+          </article>
+          <article class="job-card">
+            <div class="top"><div class="logo naver"></div><div><div class="company"><b>네이버</b>IT · 5,000+</div></div></div>
+            <h4>Backend Engineer · Search Platform</h4>
+            <div class="meta">성남시 분당구 · 5년+ · 정규직</div>
+            <footer><span class="reward">합격축하금 1,200,000원</span><span class="badge due">D-3</span></footer>
+          </article>
+          <article class="job-card">
+            <div class="top"><div class="logo coupang"></div><div><div class="company"><b>쿠팡</b>커머스 · 10,000+</div></div></div>
+            <h4>Data Engineer · Logistics</h4>
+            <div class="meta">서울 송파구 · 4년+ · 정규직</div>
+            <footer><span class="reward">합격축하금 800,000원</span><span class="badge new">NEW</span></footer>
+          </article>
+        </div>
+      </section>
+
+      <aside>
+        <div class="resume-card">
+          <div class="label">My Resume</div>
+          <h4>이력서 완성도</h4>
+          <div style="font-size:13px; opacity:0.75;">자기소개와 포트폴리오를 추가하면 매칭이 30% 늘어요.</div>
+          <div class="progress"><div></div></div>
+          <div class="pct">72 % · 5 / 7 sections</div>
+        </div>
+
+        <div class="recruit-card">
+          <h4>나에게 들어온 제안 4</h4>
+          <div class="applicant"><div class="avatar">RM</div><div class="meta"><div class="name">리멤버 &middot; HR</div><div class="role">Frontend Lead — 1.2억</div></div><div class="score">96%</div></div>
+          <div class="applicant"><div class="avatar" style="background:linear-gradient(135deg,#FF9200,#FF5E00)">DG</div><div class="meta"><div class="name">당근 &middot; 채용팀</div><div class="role">Senior Web Engineer</div></div><div class="score">92%</div></div>
+          <div class="applicant"><div class="avatar" style="background:linear-gradient(135deg,#6541F2,#CB59FF)">ZP</div><div class="meta"><div class="name">제페토 &middot; 인사팀</div><div class="role">Product Designer</div></div><div class="score">88%</div></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleIdentifier</key>
+  <string>life.nomad.calendar-context</string>
+  <key>CFBundleName</key>
+  <string>Nomad Calendar Context</string>
+  <key>NSCalendarsUsageDescription</key>
+  <string>Nomad Life reads calendar events locally to prepare read-only schedule context.</string>
+  <key>NSCalendarsFullAccessUsageDescription</key>
+  <string>Nomad Life reads calendar events locally to prepare read-only schedule context.</string>
+</dict>
+</plist>

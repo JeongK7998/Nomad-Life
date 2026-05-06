@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.env
+.env.*
+!.env.example
+.vercel/
+.secrets/
+local-secrets/
+.playwright-cli/
+output/playwright/
+
+# Local/generated runtime artifacts. Keep directory contracts in the project,
+# but do not commit personal captures, reports, dashboards, or app snapshots.
+data/**/*.json
+data/**/*.jsonl
+data/inbox/cloud
+data/sync/processed/**
+!data/sync/processed/.gitkeep
+dashboard/*.json
+reports/**/*.md
+reports/*.png
+
+# Local compiled bridge binaries.
+scripts/local_app_bridges/calendar_context
+.vercel

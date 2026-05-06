@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WantedSpace — Recruiting workspace</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; background: var(--background-alternative); font-family: var(--font-sans); }
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* Sidebar */
+  .side { background: var(--coolNeutral-10); color: #fff; padding: 24px 0; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; }
+  .side .brand { padding: 0 24px 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 16px; }
+  .side .brand img { height: 24px; filter: brightness(0) invert(1); }
+  .side .brand span { font-size: 13px; opacity: 0.6; padding-left: 4px; }
+  .side .group { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; padding: 16px 24px 8px; opacity: 0.5; }
+  .side a { display: flex; align-items: center; gap: 12px; padding: 10px 24px; color: rgba(255,255,255,0.78); font-size: 14px; text-decoration: none; }
+  .side a img { width: 18px; height: 18px; opacity: 0.85; filter: brightness(0) invert(1); }
+  .side a.active { background: rgba(0,102,255,0.16); color: #fff; border-left: 3px solid var(--primary-normal); padding-left: 21px; }
+  .side a:hover { background: rgba(255,255,255,0.04); color: #fff; }
+  .side .badge { margin-left: auto; background: rgba(255,255,255,0.12); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+  .side .badge.live { background: var(--status-positive); }
+
+  /* Main */
+  main { padding: 32px 40px; }
+  .crumbs { font-size: 12px; color: var(--label-alternative); margin-bottom: 8px; }
+  .crumbs span { color: var(--label-normal); font-weight: 600; }
+  .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+  .head h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.024em; }
+  .head .actions { display: flex; gap: 8px; }
+  .btn { font-family: inherit; border: 0; cursor: pointer; height: 40px; padding: 0 16px; border-radius: 8px; font-weight: 600; font-size: 14px; }
+  .btn-primary { background: var(--primary-normal); color: #fff; }
+  .btn-secondary { background: #fff; color: var(--label-normal); border: 1px solid var(--line-normal); }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat { background: #fff; border: 1px solid var(--line-neutral); border-radius: 12px; padding: 20px; }
+  .stat .label { font-size: 12px; color: var(--label-alternative); margin-bottom: 8px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .stat .num { font-size: 32px; font-weight: 800; letter-spacing: -0.025em; line-height: 1; }
+  .stat .delta { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+  .stat .delta.up { color: var(--status-positive); }
+  .stat .delta.down { color: var(--status-negative); }
+
+  /* Pipeline */
+  .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .col { background: #fff; border-radius: 12px; padding: 14px; border: 1px solid var(--line-neutral); display: flex; flex-direction: column; gap: 10px; min-height: 480px; }
+  .col header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--line-alternative); }
+  .col header .name { font-size: 13px; font-weight: 700; }
+  .col header .count { font-size: 11px; background: var(--fill-normal); padding: 2px 8px; border-radius: 9999px; font-weight: 700; }
+  .candidate { background: var(--background-alternative); border-radius: 10px; padding: 12px; cursor: grab; }
+  .candidate:hover { background: #fff; box-shadow: var(--shadow-emphasize-xsmall); }
+  .candidate .name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .candidate .title { font-size: 12px; color: var(--label-alternative); margin-bottom: 8px; }
+  .candidate .footer { display: flex; justify-content: space-between; align-items: center; }
+  .candidate .score { font-size: 11px; font-weight: 700; color: var(--primary-normal); }
+  .candidate .stars { display: flex; gap: 1px; }
+  .candidate .star { width: 10px; height: 10px; background: var(--coolNeutral-92); border-radius: 1px; }
+  .candidate .star.on { background: var(--status-cautionary); }
+  .col.match header .count { background: rgba(0,102,255,0.10); color: var(--primary-normal); }
+  .col.hired header .count { background: rgba(0,191,64,0.10); color: var(--status-positive); }
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="side">
+      <div class="brand"><img src="../assets/wanted-space-logotype.svg"><span style="display:none">Space</span></div>
+      <div class="group">Recruiting</div>
+      <a class="active"><img src="../assets/icons/business-bag.svg">채용 공고<span class="badge live">12</span></a>
+      <a><img src="../assets/icons/person.svg">지원자</a>
+      <a><img src="../assets/icons/sparkle.svg">AI 매칭</a>
+      <a><img src="../assets/icons/message.svg">메시지<span class="badge">3</span></a>
+      <a><img src="../assets/icons/calendar.svg">일정 / 면접</a>
+      <div class="group">Insights</div>
+      <a><img src="../assets/icons/document-text.svg">리포트</a>
+      <a><img src="../assets/icons/star.svg">인재풀</a>
+      <div class="group">Account</div>
+      <a><img src="../assets/icons/setting.svg">설정</a>
+    </aside>
+
+    <main>
+      <div class="crumbs">채용 공고 / <span>Senior Frontend Engineer (Web)</span></div>
+      <div class="head">
+        <h1>지원자 파이프라인</h1>
+        <div class="actions">
+          <button class="btn btn-secondary">엑셀 내보내기</button>
+          <button class="btn btn-primary">+ 후보자 추가</button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="label">총 지원자</div><div class="num">87</div><div class="delta up">▲ 12 vs last week</div></div>
+        <div class="stat"><div class="label">서류 검토 중</div><div class="num">23</div><div class="delta">avg 2.1d</div></div>
+        <div class="stat"><div class="label">면접 진행</div><div class="num">9</div><div class="delta up">▲ 3 vs last week</div></div>
+        <div class="stat"><div class="label">합격 / 입사</div><div class="num">2</div><div class="delta" style="color:var(--label-alternative)">목표 5명</div></div>
+      </div>
+
+      <div class="pipeline">
+        <div class="col match"><header><span class="name">AI 매칭</span><span class="count">14</span></header>
+          <div class="candidate"><div class="name">김지수</div><div class="title">Senior FE · 토스 → 7yrs</div><div class="footer"><span class="score">96% match</span><span class="stars"><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star on"></span></span></div></div>
+          <div class="candidate"><div class="name">박민호</div><div class="title">Sr Frontend · 카카오 → 5yrs</div><div class="footer"><span class="score">92% match</span><span class="stars"><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star"></span></span></div></div>
+          <div class="candidate"><div class="name">이서연</div><div class="title">Frontend Lead · 라인 → 8yrs</div><div class="footer"><span class="score">90% match</span><span class="stars"><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star"></span></span></div></div>
+        </div>
+        <div class="col"><header><span class="name">서류 검토</span><span class="count">23</span></header>
+          <div class="candidate"><div class="name">최지훈</div><div class="title">Frontend · 네이버 → 4yrs</div><div class="footer"><span class="score">88% match</span><span class="stars"><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star"></span></span></div></div>
+          <div class="candidate"><div class="name">정유진</div><div class="title">Senior FE · 쿠팡 → 6yrs</div><div class="footer"><span class="score">85% match</span><span class="stars"><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star"></span><span class="star"></span></span></div></div>
+        </div>
+        <div class="col"><header><span class="name">1차 면접</span><span class="count">6</span></header>
+          <div class="candidate"><div class="name">한도윤</div><div class="title">Sr Web Eng · 야놀자 → 5yrs</div><div class="footer"><span class="score">91% match</span><span class="stars"><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star"></span></span></div></div>
+          <div class="candidate"><div class="name">윤서아</div><div class="title">Frontend · 우아한형제들 → 5yrs</div><div class="footer"><span class="score">87% match</span><span class="stars"><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star"></span></span></div></div>
+        </div>
+        <div class="col"><header><span class="name">최종 면접</span><span class="count">3</span></header>
+          <div class="candidate"><div class="name">조현우</div><div class="title">Frontend Lead · 당근 → 7yrs</div><div class="footer"><span class="score">94% match</span><span class="stars"><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star on"></span><span class="star on"></span></span></div></div>
+        </div>
+        <div class="col hired"><header><span class="name">합격</span><span class="count">2</span></header>
+          <div class="candidate" style="background: rgba(0,191,64,0.06); border: 1px solid rgba(0,191,64,0.18);"><div class="name">강은비 · 입사 확정</div><div class="title">Senior FE · 11.18 시작</div><div class="footer"><span class="score" style="color:var(--status-positive)">offer accepted</span></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
