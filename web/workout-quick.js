@@ -394,7 +394,7 @@ function renderDialog(item) {
 }
 
 async function loadInitialData() {
-  const exercisePath = isSupabaseMode() ? "/web/data/exercise-library.json" : "/api/exercises";
+  const exercisePath = isSupabaseMode() ? "/data/exercise-library.json" : "/api/exercises";
   const historyLoader = isSupabaseMode()
     ? Promise.resolve({ sessions: [] })
     : loadJson("/api/workout-history").catch(() => ({ sessions: [] }));

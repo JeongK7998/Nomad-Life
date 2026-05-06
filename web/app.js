@@ -538,7 +538,7 @@ function refreshExerciseActions() {
 }
 
 async function loadExerciseLibrary() {
-  const exercisePath = isSupabaseMode() ? "/web/data/exercise-library.json" : "/api/exercises";
+  const exercisePath = isSupabaseMode() ? "/data/exercise-library.json" : "/api/exercises";
   const payload = await loadJson(exercisePath).catch(() => ({ exercises: [] }));
   exerciseLibrary = payload.exercises || [];
   refreshExerciseOptions();
