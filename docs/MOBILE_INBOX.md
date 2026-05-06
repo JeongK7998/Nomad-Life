@@ -41,6 +41,28 @@ Roles:
 - Local Dashboard: immediate local feedback while MacBook is running.
 - iCloud Drive: offline fallback/dropbox for files and large media.
 
+## iPhone Home Screen Entry
+
+The first mobile-first PWA entry is Workout Quick.
+
+```txt
+iPhone Home Screen
+  -> /workout
+  -> workout_queue in Supabase project "Nomad Life"
+  -> scripts/supabase_worker.py on Mac
+  -> data/health/workout-sessions.jsonl
+  -> dashboard/health.json
+  -> dashboard_snapshots in Supabase project "Nomad Life"
+```
+
+The hosted route is stable:
+
+```txt
+https://nomad-life-neon.vercel.app/workout
+```
+
+On iPhone, open this URL in Safari and choose Share -> Add to Home Screen. The installed icon opens the workout input form directly and shares an in-progress workout draft with the Health form in the main dashboard.
+
 ## Supabase Queue Payloads
 
 Capture queue payload:
