@@ -1,3 +1,13 @@
+import {
+  buildStrengthWorkoutPayload,
+  clearWorkoutDraft,
+  nextSetIndex,
+  readWorkoutDraft,
+  reindexStrengthEntries,
+  writeWorkoutDraft,
+  WORKOUT_DRAFT_STORAGE_KEY,
+} from "./workout-shared.js?v=20260506-workout-shared";
+
 const muscleSelect = document.querySelector("#muscle-select");
 const exerciseSelect = document.querySelector("#exercise-select");
 const favoriteButton = document.querySelector("#favorite-button");
@@ -83,10 +93,13 @@ function formatTime(value) {
   }).format(date);
 }
 
-function setWorkoutStartedAt(value = new Date()) {
+function setWorkoutStartedAt(value = new Date(), persist = true) {
   workoutStartedAt = value.toISOString();
   setTimeFields(value);
   timeStatus.textContent = `${formatTime(workoutStartedAt)} 적용`;
+  if (persist) {
+    persistDraft();
+  }
 }
 
 async function loadJson(path) {
@@ -209,12 +222,7 @@ function refreshExerciseOptions() {
 }
 
 function reindexEntries() {
-  const counts = {};
-  workoutEntries = workoutEntries.map((entry) => {
-    const key = entry.exercise || "exercise";
-    counts[key] = (counts[key] || 0) + 1;
-    return { ...entry, set_index: counts[key] };
-  });
+  workoutEntries = reindexStrengthEntries(workoutEntries);
 }
 
 function currentFormState() {
@@ -258,6 +266,30 @@ function resetEditMode() {
   editingIndex = null;
   editingReturnState = null;
   addSetButton.textContent = "Add Set";
+}
+
+function persistDraft() {
+  writeWorkoutDraft({
+    source: "workout_quick",
+    started_at: workoutStartedAt,
+    entries: workoutEntries,
+    note: noteInput.value,
+    form_state: currentFormState(),
+  });
+}
+
+function restoreDraft() {
+  const draft = readWorkoutDraft();
+  if (!draft || (!(draft.entries || []).length && !draft.note)) {
+    return;
+  }
+  workoutStartedAt = draft.started_at || workoutStartedAt;
+  setTimeFields(new Date(workoutStartedAt));
+  workoutEntries = reindexStrengthEntries(draft.entries || []);
+  noteInput.value = draft.note || "";
+  applyFormState(draft.form_state);
+  renderDraft();
+  timeStatus.textContent = `${formatTime(workoutStartedAt)} draft restored`;
 }
 
 function groupedEntries() {
@@ -329,12 +361,13 @@ function addOrEditSet() {
     const returnState = editingReturnState;
     resetEditMode();
     applyFormState(returnState);
+    persistDraft();
     return;
   }
 
-  const sameExerciseCount = workoutEntries.filter((item) => item.exercise === entry.exercise).length;
-  workoutEntries.push({ ...entry, set_index: sameExerciseCount + 1 });
+  workoutEntries.push({ ...entry, set_index: nextSetIndex(workoutEntries, entry.exercise) });
   renderDraft();
+  persistDraft();
   quickStatus.textContent = `${exerciseName(entry.exercise)} set added.`;
 }
 
@@ -456,6 +489,7 @@ draftList.addEventListener("click", (event) => {
     applyFormState(returnState);
   }
   renderDraft();
+  persistDraft();
   quickStatus.textContent = "Set removed.";
 });
 
@@ -467,14 +501,12 @@ quickForm.addEventListener("submit", (event) => {
   }
   saveWorkoutButton.disabled = true;
   quickStatus.textContent = "Saving workout...";
-  const payload = {
-    type: "strength",
-    started_at: workoutStartedAt,
-    ended_at: new Date().toISOString(),
-    muscle_group: muscleSelect.value,
+  const payload = buildStrengthWorkoutPayload({
+    startedAt: workoutStartedAt,
+    muscleGroup: muscleSelect.value,
     entries: workoutEntries,
-    note: noteInput.value.trim(),
-  };
+    note: noteInput.value,
+  });
   const savePromise = isSupabaseMode()
     ? supabaseRequest("workout_queue", {
       method: "POST",
@@ -507,7 +539,8 @@ quickForm.addEventListener("submit", (event) => {
       workoutEntries = [];
       noteInput.value = "";
       resetEditMode();
-      setWorkoutStartedAt(new Date());
+      setWorkoutStartedAt(new Date(), false);
+      clearWorkoutDraft();
       renderDraft();
       await loadInitialData();
       quickStatus.textContent = isSupabaseMode() ? "Workout queued. Mac Hermes가 처리합니다." : "Workout saved.";
@@ -520,9 +553,29 @@ quickForm.addEventListener("submit", (event) => {
     });
 });
 
-setWorkoutStartedAt(new Date());
+[muscleSelect, exerciseSelect, weightInput, repsInput, rpeInput, noteInput].forEach((element) => {
+  element.addEventListener("change", persistDraft);
+  element.addEventListener("input", persistDraft);
+});
+
+window.addEventListener("storage", (event) => {
+  if (event.key !== WORKOUT_DRAFT_STORAGE_KEY) {
+    return;
+  }
+  if (!event.newValue) {
+    workoutEntries = [];
+    noteInput.value = "";
+    resetEditMode();
+    renderDraft();
+    return;
+  }
+  restoreDraft();
+});
+
+setWorkoutStartedAt(new Date(), false);
 loadAppConfig()
   .then(loadInitialData)
+  .then(restoreDraft)
   .then(() => {
     if (isSupabaseMode()) {
       quickStatus.textContent = "Cloud mode: Supabase queue에 저장됩니다.";

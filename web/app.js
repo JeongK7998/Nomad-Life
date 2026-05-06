@@ -1,3 +1,13 @@
+import {
+  buildStrengthWorkoutPayload,
+  clearWorkoutDraft,
+  nextSetIndex,
+  readWorkoutDraft,
+  reindexStrengthEntries,
+  writeWorkoutDraft,
+  WORKOUT_DRAFT_STORAGE_KEY,
+} from "./workout-shared.js?v=20260506-workout-shared";
+
 const todayDate = document.querySelector("#today-date");
 const summary = document.querySelector("#summary");
 const focusList = document.querySelector("#focus-list");
@@ -213,27 +223,20 @@ function applyWorkoutStartedAt() {
   workoutStartedAt = new Date(`${workoutStartDate.value}T${workoutStartTime.value}`).toISOString();
   workoutTimeStatus.textContent = `${formatAppliedTime(workoutStartedAt)} 적용 완료`;
   workoutTimePopover.hidden = true;
+  persistWorkoutDraft();
 }
 
 function reindexWorkoutEntries() {
-  const counts = {};
-  workoutEntries = workoutEntries.map((entry) => {
-    const key = entry.exercise || "exercise";
-    counts[key] = (counts[key] || 0) + 1;
-    return {
-      ...entry,
-      set_index: counts[key],
-    };
-  });
+  workoutEntries = reindexStrengthEntries(workoutEntries);
 }
 
 function addWorkoutEntry(entry) {
-  const sameExerciseCount = workoutEntries.filter((item) => item.exercise === entry.exercise).length;
   workoutEntries.push({
     ...entry,
-    set_index: sameExerciseCount + 1,
+    set_index: nextSetIndex(workoutEntries, entry.exercise),
   });
   renderWorkoutSets();
+  persistWorkoutDraft();
 }
 
 function currentWorkoutFormState() {
@@ -282,6 +285,30 @@ function resetWorkoutEditMode() {
   editingWorkoutIndex = null;
   editingReturnState = null;
   addWorkoutSet.textContent = "Add Set";
+}
+
+function persistWorkoutDraft() {
+  writeWorkoutDraft({
+    source: "dashboard_workout_form",
+    started_at: workoutStartedAt,
+    entries: workoutEntries,
+    note: workoutNote.value,
+    form_state: currentWorkoutFormState(),
+  });
+}
+
+function restoreWorkoutDraft() {
+  const draft = readWorkoutDraft();
+  if (!draft || (!(draft.entries || []).length && !draft.note)) {
+    return;
+  }
+  workoutStartedAt = draft.started_at || workoutStartedAt;
+  setTimePickerValue(new Date(workoutStartedAt));
+  workoutEntries = reindexStrengthEntries(draft.entries || []);
+  workoutNote.value = draft.note || "";
+  applyWorkoutFormState(draft.form_state);
+  renderWorkoutSets();
+  workoutTimeStatus.textContent = `${formatAppliedTime(workoutStartedAt)} draft restored`;
 }
 
 function setActiveView(viewName, updateHash = true) {
@@ -1606,6 +1633,7 @@ addWorkoutSet.addEventListener("click", () => {
     const returnState = editingReturnState;
     resetWorkoutEditMode();
     applyWorkoutFormState(returnState);
+    persistWorkoutDraft();
     return;
   }
 
@@ -1644,6 +1672,7 @@ workoutSetList.addEventListener("click", (event) => {
     applyWorkoutFormState(returnState);
   }
   renderWorkoutSets();
+  persistWorkoutDraft();
   workoutStatus.textContent = "Set removed.";
 });
 
@@ -1655,14 +1684,12 @@ workoutForm.addEventListener("submit", (event) => {
   }
 
   workoutStatus.textContent = "Saving workout...";
-  const payload = {
-    type: "strength",
-    started_at: workoutStartedAt,
-    ended_at: new Date().toISOString(),
-    muscle_group: workoutMuscle.value,
+  const payload = buildStrengthWorkoutPayload({
+    startedAt: workoutStartedAt,
+    muscleGroup: workoutMuscle.value,
     entries: workoutEntries,
-    note: workoutNote.value.trim(),
-  };
+    note: workoutNote.value,
+  });
   const savePromise = isSupabaseMode()
     ? supabaseRequest("workout_queue", {
       method: "POST",
@@ -1696,6 +1723,7 @@ workoutForm.addEventListener("submit", (event) => {
     .then(() => {
       workoutEntries = [];
       workoutNote.value = "";
+      clearWorkoutDraft();
       resetWorkoutStartedAt();
       resetWorkoutEditMode();
       renderWorkoutSets();
@@ -1761,6 +1789,25 @@ workspaceOverview.addEventListener("click", (event) => {
   setActiveView(card.dataset.overviewView);
 });
 
+[workoutMuscle, workoutExercise, exerciseSearch, workoutWeight, workoutReps, workoutRpe, workoutNote].forEach((element) => {
+  element.addEventListener("change", persistWorkoutDraft);
+  element.addEventListener("input", persistWorkoutDraft);
+});
+
+window.addEventListener("storage", (event) => {
+  if (event.key !== WORKOUT_DRAFT_STORAGE_KEY) {
+    return;
+  }
+  if (!event.newValue) {
+    workoutEntries = [];
+    workoutNote.value = "";
+    resetWorkoutEditMode();
+    renderWorkoutSets();
+    return;
+  }
+  restoreWorkoutDraft();
+});
+
 resetWorkoutStartedAt();
 renderWorkoutSets();
 setActiveView(window.location.hash.replace("#", "") || "today", false);
@@ -1768,6 +1815,9 @@ loadAppConfig()
   .then(() => {
     setCloudModeUi();
     return loadExerciseLibrary();
+  })
+  .then(() => {
+    restoreWorkoutDraft();
   })
   .then(loadDashboard)
   .catch((error) => {
