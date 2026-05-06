@@ -182,16 +182,24 @@ SUPABASE_SERVICE_ROLE_KEY=...
 Smoke test:
 
 ```bash
-scripts/supabase_worker.py --dry-run
+npm run sync:dry
 ```
 
-Process pending rows and publish snapshots:
+Process pending rows and publish snapshots for Supabase project "Nomad Life":
 
 ```bash
-scripts/supabase_worker.py --process --publish-snapshots
+npm run sync
 ```
 
-The worker writes `sync_logs` rows for queue pulls, processed items, failures, and snapshot publishes. Review this table first when a mobile capture, Workout Quick entry, or hosted dashboard snapshot looks stale.
+Run the same sync every five minutes while the Mac is awake:
+
+```bash
+npm run sync:watch
+```
+
+`scripts/run_nomad_sync.py` loads `.env`, prevents overlapping runs with `data/sync/nomad-sync.lock`, calls `scripts/supabase_worker.py`, and appends a local run summary to `data/action_logs/nomad-sync-runs.jsonl`.
+
+The worker writes `sync_logs` rows in Supabase project "Nomad Life" for queue pulls, processed items, failures, and snapshot publishes. Review this table first when a mobile capture, Workout Quick entry, or hosted dashboard snapshot looks stale.
 
 Preview publishable snapshots without Supabase credentials:
 

@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "echo \"Static Nomad Dashboard: no build step\""
+    "build": "echo \"Static Nomad Dashboard: no build step\"",
+    "sync": "scripts/run_nomad_sync.py",
+    "sync:dry": "scripts/run_nomad_sync.py --dry-run",
+    "sync:watch": "scripts/run_nomad_sync.py --watch --interval 300"
   }
 }

@@ -53,12 +53,13 @@ Vercel Dashboard / Quick Panels
 Worker command:
 
 ```bash
-scripts/supabase_worker.py --process --publish-snapshots
+npm run sync
 ```
 
 Rules:
 
 - Do not place `SUPABASE_SERVICE_ROLE_KEY` in Vercel or browser code.
+- `npm run sync` targets Supabase project "Nomad Life" through local `.env`, uses a local lock file, and writes local run logs under `data/action_logs/`.
 - Do not run Hermes inside Vercel.
 - Do not process private Mac app context in Supabase.
 - Queue rows are input requests; they are not approved external app actions.

@@ -329,6 +329,7 @@ Cloud-light 도입 시에도 local-first/privacy-first 원칙을 유지한다. S
 - Telegram 일반 대화는 자동으로 저장하지 않는다. 저장 의도가 불명확하면 Coordinator가 확인하거나 저장 제안만 한다.
 - Quick Capture 저장 후에는 dashboard, notification candidates 같은 파생 로컬 출력이 함께 갱신된다. Finance 분석은 별도 외부 가계부 export/read-only import를 기준으로 갱신한다.
 - 지출 기록은 처음부터 확정 가계부로 저장하지 않고 `data/expenses/expense-candidates.json`에 review candidate로 생성한다.
+- Mac Hermes Worker의 기본 cloud-light sync 진입점은 `npm run sync`다. 이 명령은 Supabase 프로젝트 "Nomad Life" queue 처리, dashboard snapshot publish, 중복 실행 방지 lock, local run log 기록을 함께 수행한다.
 
 현재 개발 초점:
 
