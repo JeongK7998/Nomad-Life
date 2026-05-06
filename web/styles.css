@@ -283,7 +283,7 @@ textarea {
   background: var(--background-elevated);
   color: var(--label-normal);
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
   letter-spacing: 0.0096em;
 }
@@ -639,7 +639,7 @@ input {
   background: var(--background-elevated);
   color: var(--label-normal);
   font: inherit;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.429;
 }
 

@@ -163,7 +163,7 @@ select,
 input {
   min-height: 46px;
   padding: 0 var(--space-12);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -171,7 +171,7 @@ textarea {
   min-height: 86px;
   padding: var(--space-12);
   resize: vertical;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
 }
 
@@ -351,8 +351,4 @@ button {
     grid-template-columns: 48px 48px minmax(0, 1fr);
   }
 
-  select,
-  input {
-    font-size: 14px;
-  }
 }
