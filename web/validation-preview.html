@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nomad Validation Preview</title>
+    <style>
+      :root {
+        --bg: #f5f7fa;
+        --panel: #fff;
+        --line: #dce2eb;
+        --text: #172033;
+        --muted: #667085;
+        --soft: #eef3f8;
+        --blue: #06f;
+        --green: #0a7f50;
+        --amber: #b7791f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif;
+      }
+
+      .shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel);
+        flex-wrap: wrap;
+      }
+
+      .title {
+        margin-right: auto;
+        display: grid;
+        gap: 4px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 20px;
+        line-height: 1.3;
+      }
+
+      h2 {
+        font-size: 16px;
+        line-height: 1.4;
+      }
+
+      h3 {
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      p,
+      li,
+      td,
+      th {
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      small,
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 0 8px;
+        border-radius: 999px;
+        background: var(--soft);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .badge.ready {
+        background: #e8f7ef;
+        color: var(--green);
+      }
+
+      .badge.waiting {
+        background: #fff5df;
+        color: var(--amber);
+      }
+
+      button,
+      a.button {
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--text);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-decoration: none;
+      }
+
+      a.button.primary {
+        border-color: var(--blue);
+        background: var(--blue);
+        color: #fff;
+      }
+
+      main {
+        min-width: 0;
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .two {
+        grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      }
+
+      .three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      section,
+      article {
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      section {
+        padding: 16px;
+        display: grid;
+        gap: 14px;
+      }
+
+      article {
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .pipeline {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .step {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        background: #fbfcfe;
+        min-height: 112px;
+      }
+
+      .step strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+
+      .agent-card {
+        border-left: 4px solid var(--blue);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        border-top: 1px solid var(--line);
+        padding: 9px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #f8fafc;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .check {
+        color: var(--green);
+        font-weight: 800;
+      }
+
+      .queue {
+        display: grid;
+        gap: 10px;
+      }
+
+      .queue-item {
+        display: grid;
+        grid-template-columns: minmax(120px, 0.7fr) minmax(0, 1.4fr) minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fbfcfe;
+      }
+
+      .scope-list {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .scope-chip {
+        min-height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 7px 9px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fbfcfe;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .preview-frame {
+        height: 560px;
+        overflow: hidden;
+        padding: 0;
+      }
+
+      .screen-board {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 14px;
+      }
+
+      .screen-card {
+        padding: 0;
+        overflow: hidden;
+      }
+
+      .screen-card header {
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        padding: 10px 12px;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .screen-card iframe {
+        display: block;
+        width: 390px;
+        height: 844px;
+        transform: scale(0.68);
+        transform-origin: top left;
+        border: 0;
+      }
+
+      .screen-viewport {
+        height: 574px;
+        overflow: hidden;
+        background: #eef2f7;
+      }
+
+      .screen-card.tablet iframe {
+        width: 768px;
+        height: 1024px;
+        transform: scale(0.38);
+      }
+
+      .screen-card.tablet .screen-viewport {
+        height: 390px;
+      }
+
+      .screen-card.desktop iframe {
+        width: 1440px;
+        height: 900px;
+        transform: scale(0.22);
+      }
+
+      .screen-card.desktop .screen-viewport {
+        height: 198px;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+
+      @media (max-width: 980px) {
+        .two,
+        .three,
+        .pipeline,
+        .scope-list {
+          grid-template-columns: 1fr;
+        }
+
+        .queue-item {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <div class="title">
+          <h1>Validation Process Preview</h1>
+          <p class="muted">검증은 아직 실행하지 않음 · 전체 영역 기준 · sandbox 전용</p>
+        </div>
+        <span class="badge waiting">Preview only</span>
+        <a class="button" href="/web/preview.html">App Preview</a>
+        <a class="button primary" href="/reports/validation/2026-05-21-summary.html">Last Report</a>
+      </header>
+
+      <main>
+        <section>
+          <div class="section-head">
+            <div>
+              <h2>검증 파이프라인</h2>
+              <p class="muted">사용자 확인 후에만 실제 browser validation을 실행하는 흐름</p>
+            </div>
+            <span class="badge ready">3 agents</span>
+          </div>
+          <div class="pipeline">
+            <div class="step">
+              <strong>1. Setup</strong>
+              <p>sandbox fixture 생성, 실제 data ledger와 분리</p>
+            </div>
+            <div class="step">
+              <strong>2. Scope Queue</strong>
+              <p>전체 앱 영역을 queue item으로 펼치고 agent coverage 지정</p>
+            </div>
+            <div class="step">
+              <strong>3. Visual Preview</strong>
+              <p>해상도별 대표 화면을 보이는 브라우저에서 확인</p>
+            </div>
+            <div class="step">
+              <strong>4. Agent Review</strong>
+              <p>UX, GUI, Data Value가 같은 evidence를 다른 기준으로 판정</p>
+            </div>
+            <div class="step">
+              <strong>5. Report</strong>
+              <p>scenario trace, screenshot, findings, next action 생성</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <div>
+              <h2>전체 화면 프리뷰 보드</h2>
+              <p class="muted">검증 실행 전, 모든 주요 화면을 같은 페이지에서 훑어보는 영역</p>
+            </div>
+            <span class="badge ready">screen board</span>
+          </div>
+          <div class="screen-board">
+            <article class="screen-card">
+              <header><h3>Main Agent</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#main" title="Main Agent mobile"></iframe></div>
+            </article>
+            <article class="screen-card">
+              <header><h3>Input History</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#capture" title="Input History mobile"></iframe></div>
+            </article>
+            <article class="screen-card">
+              <header><h3>Activity</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#activity" title="Activity mobile"></iframe></div>
+            </article>
+            <article class="screen-card">
+              <header><h3>AI Work</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#ai-work" title="AI Work mobile"></iframe></div>
+            </article>
+            <article class="screen-card">
+              <header><h3>Health</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#health" title="Health mobile"></iframe></div>
+            </article>
+            <article class="screen-card">
+              <header><h3>English</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#english" title="English mobile"></iframe></div>
+            </article>
+            <article class="screen-card">
+              <header><h3>Finance</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#finance" title="Finance mobile"></iframe></div>
+            </article>
+            <article class="screen-card">
+              <header><h3>Context Agents</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#context" title="Context Agents mobile"></iframe></div>
+            </article>
+            <article class="screen-card">
+              <header><h3>Agent Council</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#council" title="Agent Council mobile"></iframe></div>
+            </article>
+            <article class="screen-card">
+              <header><h3>Reports</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#reports" title="Reports mobile"></iframe></div>
+            </article>
+            <article class="screen-card">
+              <header><h3>Settings</h3><span class="badge">mobile</span></header>
+              <div class="screen-viewport"><iframe src="/web/#settings" title="Settings mobile"></iframe></div>
+            </article>
+            <article class="screen-card tablet">
+              <header><h3>Health Tablet</h3><span class="badge">tablet</span></header>
+              <div class="screen-viewport"><iframe src="/web/#health" title="Health tablet"></iframe></div>
+            </article>
+            <article class="screen-card tablet">
+              <header><h3>Finance Tablet</h3><span class="badge">tablet</span></header>
+              <div class="screen-viewport"><iframe src="/web/#finance" title="Finance tablet"></iframe></div>
+            </article>
+            <article class="screen-card desktop">
+              <header><h3>Main Desktop</h3><span class="badge">desktop</span></header>
+              <div class="screen-viewport"><iframe src="/web/#main" title="Main desktop"></iframe></div>
+            </article>
+          </div>
+        </section>
+
+        <div class="grid two">
+          <section>
+            <div class="section-head">
+              <h2>전체 영역 Scope</h2>
+              <span class="badge">all surfaces</span>
+            </div>
+            <div class="scope-list">
+              <div class="scope-chip">Main Agent <span class="check">✓</span></div>
+              <div class="scope-chip">Nomad Quick <span class="check">✓</span></div>
+              <div class="scope-chip">Input History <span class="check">✓</span></div>
+              <div class="scope-chip">Daily Detail <span class="check">✓</span></div>
+              <div class="scope-chip">Activity <span class="check">✓</span></div>
+              <div class="scope-chip">AI Work <span class="check">✓</span></div>
+              <div class="scope-chip">Health <span class="check">✓</span></div>
+              <div class="scope-chip">English <span class="check">✓</span></div>
+              <div class="scope-chip">Finance <span class="check">✓</span></div>
+              <div class="scope-chip">Context Agents <span class="check">✓</span></div>
+              <div class="scope-chip">Agent Council <span class="check">✓</span></div>
+              <div class="scope-chip">Reports <span class="check">✓</span></div>
+              <div class="scope-chip">Settings <span class="check">✓</span></div>
+              <div class="scope-chip">Detail Modals <span class="check">✓</span></div>
+              <div class="scope-chip">Forms <span class="check">✓</span></div>
+              <div class="scope-chip">Mobile Drawer <span class="check">✓</span></div>
+            </div>
+          </section>
+
+          <section>
+            <div class="section-head">
+              <h2>검증 에이전트 역할</h2>
+              <span class="badge">parallel review</span>
+            </div>
+            <div class="grid three">
+              <article class="agent-card">
+                <h3>UX Flow</h3>
+                <p>시나리오 완주, 저장/수정/삭제, modal close, fallback, error state, 과도한 단계 감지</p>
+              </article>
+              <article class="agent-card">
+                <h3>GUI</h3>
+                <p>해상도별 overlap, clipping, label/input 정렬, touch target, spacing, grouping 감지</p>
+              </article>
+              <article class="agent-card">
+                <h3>Data Value</h3>
+                <p>화면 데이터가 사용자 판단에 유의미한지, freshness/source/actionability가 보이는지 검토</p>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <section>
+          <div class="section-head">
+            <h2>전체 검증 Queue 초안</h2>
+            <span class="badge waiting">not running</span>
+          </div>
+          <div class="queue">
+            <div class="queue-item">
+              <strong>Main / Council</strong>
+              <span>summary, focus, let-go, mission, council cards, activity bars</span>
+              <span class="muted">UX + GUI + Data</span>
+              <span class="badge">desktop/mobile</span>
+            </div>
+            <div class="queue-item">
+              <strong>Nomad Quick</strong>
+              <span>open, area select, duration/date, optional detail, save, close, persistence</span>
+              <span class="muted">UX + GUI</span>
+              <span class="badge">mobile first</span>
+            </div>
+            <div class="queue-item">
+              <strong>Input History</strong>
+              <span>filter, card list, detail modal, edit grid, date field, delete, save</span>
+              <span class="muted">UX + GUI + Data</span>
+              <span class="badge waiting">needs scenario</span>
+            </div>
+            <div class="queue-item">
+              <strong>Health</strong>
+              <span>routine cards, workout dialog, muscle map, history detail, mobile density</span>
+              <span class="muted">UX + GUI + Data</span>
+              <span class="badge">tablet/mobile</span>
+            </div>
+            <div class="queue-item">
+              <strong>English</strong>
+              <span>decision header, issue tracker, pre-study context, daily log, review cards</span>
+              <span class="muted">GUI + Data</span>
+              <span class="badge">scanability</span>
+            </div>
+            <div class="queue-item">
+              <strong>Finance</strong>
+              <span>review freshness, region/category cards, sync state, uncertainty, next action</span>
+              <span class="muted">UX + GUI + Data</span>
+              <span class="badge">freshness</span>
+            </div>
+            <div class="queue-item">
+              <strong>AI Work</strong>
+              <span>project cockpit, forms, evidence, next actions, mobile header controls</span>
+              <span class="muted">UX + GUI + Data</span>
+              <span class="badge">work evidence</span>
+            </div>
+            <div class="queue-item">
+              <strong>Settings / Context / Reports</strong>
+              <span>stay settings, context cards, report display, local-only action boundaries</span>
+              <span class="muted">UX + GUI</span>
+              <span class="badge">governance</span>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h2>Coverage Matrix</h2>
+            <span class="badge">planned checks</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Check</th>
+                <th>UX Flow</th>
+                <th>GUI</th>
+                <th>Data Value</th>
+                <th>Evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>실제 클릭/입력/저장 플로우</td>
+                <td class="check">✓</td>
+                <td></td>
+                <td></td>
+                <td>scenario trace</td>
+              </tr>
+              <tr>
+                <td>모바일/태블릿/데스크톱 대표 화면</td>
+                <td></td>
+                <td class="check">✓</td>
+                <td></td>
+                <td>screenshot set</td>
+              </tr>
+              <tr>
+                <td>라벨/입력칸 겹침, 잘림, 줄바꿈</td>
+                <td></td>
+                <td class="check">✓</td>
+                <td></td>
+                <td>DOM geometry + screenshot</td>
+              </tr>
+              <tr>
+                <td>모달 내부 grid/form density</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+                <td></td>
+                <td>modal scenario</td>
+              </tr>
+              <tr>
+                <td>데이터 freshness/source/actionability</td>
+                <td></td>
+                <td></td>
+                <td class="check">✓</td>
+                <td>dashboard JSON + visible copy</td>
+              </tr>
+              <tr>
+                <td>실제 데이터와 더미 데이터 분리</td>
+                <td class="check">✓</td>
+                <td></td>
+                <td class="check">✓</td>
+                <td>sandbox marker + API contract</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h2>해상도 조절 단일 프리뷰</h2>
+            <a class="button" href="/web/preview.html">Open adjustable preview</a>
+          </div>
+          <div class="preview-frame">
+            <iframe src="/web/preview.html" title="Adjustable app preview"></iframe>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

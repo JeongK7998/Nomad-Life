@@ -62,6 +62,7 @@ Hermes Agent Runtime
 ├─ Cron Jobs
 ├─ Memory
 ├─ Local Data Folder
+├─ Codex / Work Evidence Layer
 └─ Web / Mobile Interface
 ```
 
@@ -81,6 +82,22 @@ Reports / Dashboard JSON / Action Suggestions
 Nomad Dashboard / Quick Panels
 ```
 
+AI 작업과 병렬 프로젝트 관리는 다음 흐름을 따른다.
+
+```txt
+Codex / Git / Local Project Files / Output Folders
+        ↓
+Work Evidence Importers
+        ↓
+nomad-ai-work
+        ↓
+Project KPI / Progress / Next Action / Inspiration Notes
+        ↓
+nomad-coordinator
+        ↓
+dashboard/work.json / Coordinator Brief
+```
+
 ---
 
 ## Core Philosophy
@@ -95,6 +112,7 @@ Nomad Dashboard / Quick Panels
 - 모든 목표를 균등하게 강제하지 않는다.
 - 상황에 따라 집중할 영역과 내려놓을 영역을 제안한다.
 - 자동 수집 가능한 데이터는 자동화한다.
+- AI 작업과 프로젝트 진행 데이터는 사용자의 수동 정리보다 Codex, Git, 파일 변경, 산출물 로그 같은 작업 evidence 자동 수집을 우선한다.
 - 사용자가 직접 분류하지 않도록 Quick Capture가 입력을 해석한다.
 - 기록보다 해석, 조율, 실행 제안이 중요하다.
 - 실행 권한은 단계적으로 부여한다.
@@ -119,6 +137,8 @@ Nomad Life의 웹/모바일 인터페이스는 `Design System/`에 보관된 Wan
 - Pretendard를 기본 폰트로 사용한다.
 - 색상, spacing, radius, shadow는 semantic token을 우선 사용한다.
 - 4pt grid를 따른다.
+- 주요 컨텐츠 섹션은 화면이 넓어도 기본 1열 흐름을 기준으로 한다.
+- 2열 또는 다열 레이아웃은 KPI, 작은 메트릭 박스, 범례, 짧은 반복 카드처럼 각 박스가 큰 읽기 공간을 필요로 하지 않는 경우에만 사용한다.
 - primary blue는 주요 CTA, 활성 상태, 핵심 신호에만 제한적으로 사용한다.
 - 카드와 패널은 선 중심의 flat UI를 기본으로 하고 shadow는 popover, modal, floating layer에만 제한적으로 사용한다.
 - Wanted 로고, Wanted 전용 브랜드 자산, 채용 제품 전용 카피 패턴은 Nomad Life UI에 직접 사용하지 않는다.
@@ -194,22 +214,31 @@ Nomad Dashboard는 초기에는 AI를 직접 호출하지 않는다. Hermes가 �
 - Local Dashboard는 Mac 개발과 Hermes 검증을 위한 모드다.
 - Hosted Dashboard는 Vercel에 배포해 Mac, iPad, iPhone에서 접근 가능한 모드다.
 - Hosted Dashboard는 Supabase snapshot과 queue를 읽고 쓴다.
+- Hosted Dashboard와 Quick Panels는 Supabase Auth 기반 기본 로그인 개념을 사용한다.
+- 한 번 로그인한 신뢰 기기는 브라우저/PWA 세션을 유지해 반복 로그인을 최소화한다.
+- Hosted queue, dashboard snapshot, sync log read는 Supabase Auth `user_id = auth.uid()` 기준으로 계정별 격리한다.
 - Hosted Dashboard가 Hermes Runtime을 대체하지 않는다.
 
 ### 2-1. Quick Panels
 
 Quick Panels는 iPhone/iPad/Mac에서 빠르게 입력하기 위한 전용 화면이다.
 
-초기 Quick Panels:
+초기 Quick Panel 방향:
 
-- Workout Quick
-- Capture Quick
-- Meal Quick
+- Nomad Quick PWA를 구조화 입력의 단일 진입점으로 둔다.
+- 기존 Workout Quick은 별도 제품 표면이 아니라 Nomad Quick 안의 Health detail module로 흡수한다.
+- Capture Quick, Meal Quick, Workout Quick 같은 세부 입력은 Nomad Quick 내부 모듈로 취급한다.
 
 Finance 전용 지출 입력 Quick Panel은 만들지 않는다. 지출 입력은 사용자의 기존 가계부 앱에서 계속 수행하며, Nomad Life Finance Agent는 해당 앱의 export 또는 read-only 데이터를 주기적으로 가져와 분석한다.
 
 원칙:
 
+- 입력 창구는 Nomad Quick PWA 하나로 일원화한다.
+- 첫 입력은 10초 안에 저장 가능해야 한다.
+- 첫 화면의 필수 입력은 활동 영역, 시간 방식, 짧은 메모 중심으로 제한한다.
+- 디테일 입력은 저장 후 optional 확장으로 제공한다.
+- Health처럼 추가 디테일이 필요한 영역은 저장 후 운동 루틴/세트 입력 module로 이어진다.
+- 자연어 입력은 보조 수단이며 확정 데이터가 아니라 구조화 후보 또는 메모로 취급한다.
 - 선택지는 가능한 드롭다운과 안정적인 ID를 사용한다.
 - 텍스트 자유 입력은 메모와 raw capture에 한정한다.
 - 기본 저장 경로는 Supabase queue다.
@@ -249,11 +278,17 @@ nomad-life-agent/
       pending/
       processed/
     captures/
+    activity/
     expenses/
     meals/
     health/
     work/
+      projects.json
+      codex-activity.jsonl
+      project-progress.json
     travel/
+    stays/
+    backups/
     content/
     english/
     rest/
@@ -318,9 +353,17 @@ Nomad Dashboard on Mac / iPad / iPhone
 
 Cloud-light 도입 시에도 local-first/privacy-first 원칙을 유지한다. Supabase는 항상 켜져 있는 접수창과 표시 계층으로 시작하며, 개인 데이터 해석과 승인 기반 실행은 Local Hermes 중심으로 유지한다.
 
+입력과 분석의 책임은 분리한다.
+
+- 직접 입력의 반영 담당은 Mac Hermes가 아니라 Supabase/local input ledger다.
+- Mac Hermes Worker는 입력을 반영하는 담당자가 아니라 분석, 해석, dashboard/report 생성, private local context 결합 담당자다.
+- Mac이 꺼져 있어도 Nomad Quick, Workout Quick, Hosted Dashboard에서 직접 입력한 데이터는 입력 원장에 즉시 저장되고 Input History에 보여야 한다.
+- Mac이 꺼져 있을 때 지연될 수 있는 것은 분석 결과, Coordinator 판단, dashboard/report 재생성, private local app context 결합이다.
+- 현재 구현이 queue 기반인 경우에도 UX와 데이터 계약은 `입력됨`과 `분석 대기`를 분리해 표시한다.
+
 현재 mobile capture 결정:
 
-- 기본 mobile capture와 Quick Panel 입력은 Supabase queue를 사용한다.
+- 기본 mobile capture와 Nomad Quick PWA 입력은 Supabase queue를 사용한다.
 - iCloud Drive inbox는 primary가 아니라 fallback, offline dropbox, 사진/영수증/export 파일 전달용으로 유지한다.
 - Local Dashboard는 MacBook이 켜져 있을 때 즉시 입력과 즉시 dashboard 갱신을 담당한다.
 - Hosted Dashboard는 Supabase dashboard snapshot을 읽어 모든 기기에서 확인 가능해야 한다.
@@ -330,6 +373,19 @@ Cloud-light 도입 시에도 local-first/privacy-first 원칙을 유지한다. S
 - Quick Capture 저장 후에는 dashboard, notification candidates 같은 파생 로컬 출력이 함께 갱신된다. Finance 분석은 별도 외부 가계부 export/read-only import를 기준으로 갱신한다.
 - 지출 기록은 처음부터 확정 가계부로 저장하지 않고 `data/expenses/expense-candidates.json`에 review candidate로 생성한다.
 - Mac Hermes Worker의 기본 cloud-light sync 진입점은 `npm run sync`다. 이 명령은 Supabase 프로젝트 "Nomad Life" queue 처리, dashboard snapshot publish, 중복 실행 방지 lock, local run log 기록을 함께 수행한다.
+- AI Work evidence import는 local-first 작업으로 시작하며, 초기에는 `scripts/import_codex_activity.py`가 Codex/Git evidence를 정규화한 뒤 `data/work/codex-activity.jsonl`에 append하는 방식으로 연결한다.
+
+Input History 원칙:
+
+- Input History는 raw queue monitor가 아니라 사용자-facing input ledger view다.
+- Input History에는 사용자가 직접 입력한 데이터와 사용자가 가져오도록 한 파일/import 이벤트를 표시한다.
+- 직접 입력 예시는 AI 작업 시간/작업내용, 헬스 운동시간/종류/세트, 영어 공부 시간, 식사/일반 capture, 명시적 Telegram capture다.
+- 로딩/import 예시는 영어 GPTs review file, 가계부 export file, finance sync request다. Finance 거래 row 전체나 English review 내부 항목 전체를 Input History에 row 단위로 펼치지 않는다.
+- Calendar, Notes, Codex/Git evidence, dashboard snapshot publish, 운동 라이브러리 설정 변경은 기본적으로 Input History가 아니라 Data Sources, Work Evidence, Sync Status, Settings log에서 다룬다.
+- 영어 공부 시간 수동 입력과 영어 review file은 자동 매칭하지 않는다. 시간은 activity record, 파일은 review/import record로 별도 유지한다.
+- 가계부 raw export와 Quick 지출 메모는 자동 매칭하지 않는다. Finance export가 finance canonical source이고 Quick 지출 메모는 후보로만 둔다.
+- 상태 표시는 `입력됨`, `로딩됨`, `정규화됨`, `분석 대기`, `분석됨`, `확인 필요`, `제외됨`을 사용한다.
+- 자세한 필드와 포함/제외 기준은 `docs/DATA_CONTRACTS.md`의 `Input History Ledger`를 따른다.
 
 현재 개발 초점:
 
@@ -340,26 +396,45 @@ Cloud-light 도입 시에도 local-first/privacy-first 원칙을 유지한다. S
 - 최종적으로 가장 중요한 산출물은 Dashboard다. Dashboard는 하위 에이전트 역할이 명확해진 뒤 각 영역의 비중, 누적량, 리스크, 조율안을 보여준다.
 - 현재 샘플 하위 에이전트는 Health, English, Calendar/Schedule Context를 우선 검증한다.
 - Finance는 사용자의 기존 가계부 입력 흐름을 대체하지 않고, 향후 Supabase 또는 export 기반 read-only 분석자로 설계한다.
-- Social/Creator와 AI Work 에이전트는 역할이 더 명확해질 때까지 후순위로 둔다.
-- 시간 관련 Dashboard는 명확한 capture 표현에서 activity allocation 후보를 만들고, 사용자가 어떤 활동에 시간을 쓰고 있는지 영역별 비중과 누적량을 보여주는 방향으로 시작한다.
+- AI Work 에이전트는 사용자의 1순위 관심사인 AI 작업 및 바이브 코딩을 다루는 핵심 Skill로 승격한다. Social/Creator는 역할이 더 명확해질 때까지 후순위로 둔다.
+- Activity Timeline은 모든 도메인 Agent가 공유하는 공통 spine이다.
+- Nomad Quick PWA는 원본 capture와 함께 `data/activity/activity-sessions.jsonl`에 정규화된 활동 기록을 남기는 방향으로 발전시킨다.
+- 시간 관련 Dashboard는 명확한 capture 표현과 Nomad Quick 입력에서 activity allocation 후보를 만들고, 사용자가 어떤 활동에 시간을 쓰고 있는지 영역별 비중과 누적량을 보여주는 방향으로 시작한다.
 - Activity Dashboard는 하루 24시간 대비 비중, 이번 달 경과일 기준 월간 비중, 영역별 누적 시간을 함께 보여준다.
+- 체류지/지역이 바뀌면 해당 지역을 하나의 stay package로 묶는다.
+- 현재 active stay는 `data/travel/current-stay.json`에 기록한다.
+- 모든 체류지는 `data/travel/stays-index.json`에 누적하며, active stay와 closed stay를 구분한다.
+- 새 stay를 active로 설정하면 이전 active stay는 closed stay로 남겨 과거 리뷰와 비교 분석에 사용할 수 있게 한다.
+- 지역별 패키지는 `data/stays/{stay_id}/manifest.json`와 `data/stays/{stay_id}/snapshot/`에 생성한다.
+- 지역 패키지를 만들 때는 로컬 백업도 함께 생성하며 기본 위치는 `data/backups/stays/{stay_id}/`다.
+- Canonical working data는 계속 `data/`, `dashboard/`, `reports/`에 두고, stay package는 이동/리뷰/백업을 위한 local-first grouped snapshot으로 취급한다.
+- Stay package와 backup은 개인 데이터가 포함될 수 있으므로 사용자 승인 없이 외부 클라우드에 업로드하지 않는다.
 
 ### 6. Communication Layer
 
-Nomad Life의 사용자 접점은 역할별로 분리한다.
+Nomad Life의 사용자 접점은 3개의 핵심 interaction surface로 분리한다.
 
 ```txt
-Capture Channel
-  Shortcuts / Web Quick Capture / Telegram explicit capture / local inbox
-  -> 빠른 데이터 입력
+Nomad Quick PWA
+  -> 구조화 입력의 단일 진입점
+
+Nomad Dashboard
+  -> 분석, 시각화, review, 승인
+
+Telegram + Hermes Coordinator
+  -> 데이터 기반 대화, 질문, 조율, 제안
+```
+
+세부 채널은 다음 원칙을 따른다.
+
+```txt
+Input Channel
+  Nomad Quick PWA / local inbox fallback
+  -> 빠른 구조화 데이터 입력
 
 Dashboard Channel
   Nomad Dashboard on Vercel / Local Dashboard on Mac
   -> dashboard, reports, action center, logs 확인
-
-Quick Panel Channel
-  Workout Quick / Capture Quick / Meal Quick
-  -> 빠른 구조화 입력
 
 Conversation Channel
   Hermes Chat / Telegram
@@ -455,12 +530,16 @@ nomad-finance
 nomad-food
 nomad-health
 nomad-work
+nomad-ai-work
 nomad-travel-guide
 nomad-creator
 nomad-english
 nomad-rest
 nomad-weekly-review
 nomad-dashboard-export
+nomad-ux-flow-review
+nomad-gui-review
+nomad-review-value-review
 ```
 
 각 Skill은 다음 구조를 가져야 한다.
@@ -677,6 +756,8 @@ data/context/notes-context.json
 - 기존 가계부 CSV
 - Google Sheets 데이터
 - Supabase 기반 개인 가계부 read-only view 또는 export
+- 기존 가계부 앱 서버/API의 read-only export
+- iCloud Drive 또는 local folder에 사용자가 수동으로 내려받은 JSON export
 - 영수증 사진 OCR 결과
 
 ### Collection Methods
@@ -685,18 +766,23 @@ data/context/notes-context.json
 - Google Sheets 연동
 - Supabase read-only API 또는 자동 export
 - 다른 가계부 앱의 주기적 export/download
+- 사용자가 매일 내려받은 JSON 파일을 `data/expenses/imports/inbox/`로 복사하거나 iCloud Drive finance export 폴더에서 local importer가 가져오기
 - 영수증 사진 OCR 결과는 향후 보조 입력 후보로만 검토
 
 ### Responsibilities
 
 - 예산 소진 속도 계산
 - 카테고리별 지출 분석
+- 일별/주별/월별 소비 추세와 반복 소비 패턴 분석
+- 지역/체류지/이동 일정에 따른 소비 압력 분석
 - 식비/카페/교통/체험비 분리
 - 남은 체류 기간 기준 예상 지출 계산
 - 과소비 원인 도출
 - 가치 소비와 낭비성 소비 구분 보조
 - Food, Travel, Work Agent와 지출 데이터 연결
 - Budget Burn Rate 시각화 데이터 생성
+- 다음 날 또는 이번 주에 조정 가능한 소비 항목 제안
+- 소비 데이터 품질, 누락일, 중복 가능성 표시
 
 초기 원칙:
 
@@ -705,12 +791,23 @@ data/context/notes-context.json
 - Nomad Life는 다른 앱의 지출 내역을 주기적으로 download/export 또는 read-only 방식으로 가져와 현황, 추세, 리스크를 분석한다.
 - Finance Agent는 지출 기록 입력 UI가 아니라 분석자와 조언자 역할을 한다.
 - Supabase credential, API key, schema 접근은 별도 승인 후 진행한다.
+- 우선순위는 `read-only 앱/서버 접근` → `자동 export/download` → `수동 JSON export import` 순서로 둔다.
+- 수동 JSON export는 canonical 입력의 fallback으로 인정하되, 원본 파일을 수정하지 않고 local normalized copy만 생성한다.
+- 현재 Finance JSON export 원본 폴더는 `/Users/jongiljeong/Library/Mobile Documents/com~apple~CloudDocs/Nomad_life/Finance`다.
+- iCloud Drive finance export 폴더를 사용할 경우에도 iCloud를 primary database로 보지 않고 read-only dropbox로 취급한다.
+- 초기 finance importer는 `scripts/import_finance_exports.py`이며, Nomad Pocket JSON export를 local inbox로 복사한 뒤 expense transaction만 `data/expenses/normalized-expenses.json`으로 정규화한다.
+- Mac Hermes Worker의 `npm run sync`는 snapshot publish 전에 Finance iCloud export를 읽고 `dashboard/finance-review.json`을 갱신한 뒤 Supabase `finance-review` snapshot으로 publish한다. Hosted Dashboard와 모바일은 이 분석 snapshot을 읽어 Mac local 분석과 같은 최신 Finance 리뷰를 표시한다.
+- 원본 지출 데이터의 수정, 삭제, 재분류 write-back은 사용자 승인 전에는 수행하지 않는다.
 
 ### Output Files
 
 ```txt
 data/expenses/normalized-expenses.json
+data/expenses/imports/inbox/*.json
+data/expenses/imports/processed/YYYY-MM-DD/*.json
+scripts/import_finance_exports.py
 reports/daily/YYYY-MM-DD-finance.md
+dashboard/finance-review.json
 dashboard/budget.json
 ```
 
@@ -771,7 +868,9 @@ dashboard/meal-balance.json
 
 ### Role
 
-디지털 노마드 작업과 AI 작업을 관리한다.
+디지털 노마드 작업 전반을 관리한다.
+
+`nomad-work`는 작업/휴식 균형, 작업 장소, 작업 시간, 과작업 리스크 같은 생활 운영 관점을 맡는다. AI 작업, 바이브 코딩, 병렬 프로젝트 KPI, Codex/Git evidence 기반 진척도 관리는 `nomad-ai-work`가 더 세밀하게 맡고, `nomad-work`는 그 결과를 전체 작업 리듬 안에 통합한다.
 
 ### Input Data
 
@@ -803,6 +902,7 @@ dashboard/meal-balance.json
 - 다음 작업 단위 제안
 - 막힌 지점 정리
 - 프로젝트별 진척도 추정
+- `nomad-ai-work`가 생성한 프로젝트별 progress, blocker, next action을 작업 리듬 관점에서 통합
 - 작업 장소와 생산성 연결
 - 과작업 여부 감지
 - Creator Agent와 콘텐츠화 가능성 연결
@@ -818,7 +918,94 @@ dashboard/work.json
 
 ---
 
-## 8. nomad-health
+## 8. nomad-ai-work
+
+### Role
+
+AI 작업, 바이브 코딩, 병렬 프로젝트의 KPI와 실제 진행 상황을 관리하는 Skill이다.
+
+이 Skill의 목적은 사용자가 매번 작업 내용을 수동으로 정리하게 만드는 것이 아니다. Codex 작업 로그, Git 변경, 로컬 산출물, 프로젝트별 설정, Quick Capture의 짧은 작업 메모를 evidence로 수집하고, 이를 해석해 프로젝트별 진행 상태, 막힌 지점, 다음 액션, 영감 노트를 생성한다.
+
+### Input Data
+
+- `data/work/projects.json`
+- `data/work/codex-activity.jsonl`
+- `data/work/work-sessions.json`
+- Git status, diff stat, commit log
+- Codex session metadata
+- Codex archived session summary 후보
+- shell snapshot command history
+- 프로젝트별 산출물 폴더 변경 정보
+- Quick Capture의 작업 메모
+- 캘린더 작업 블록
+
+### Collection Methods
+
+- Codex 전역 지침 기반 작업 종료 activity event
+- `scripts/import_codex_activity.py`
+- Git log / diff / status scanner
+- 프로젝트별 `AGENTS.md` 또는 `data/work/projects.json`에 정의된 evidence source
+- Motion graphics 같은 비코딩 프로젝트의 output folder scanner
+- Hermes daily run 또는 `npm run sync`에서 실행되는 local evidence import
+
+### Responsibilities
+
+- 병렬 프로젝트 목록과 상태 관리
+- 프로젝트별 KPI, milestone, current focus 정리
+- Codex/Git/file evidence를 project progress에 연결
+- 실제 진행 사항, 결정 사항, 막힌 점, 다음 액션 후보 추출
+- 사용자가 다음 작업을 시작할 때 도움이 되는 inspiration note 생성
+- 정량 progress보다 evidence 기반 상태 판단을 우선
+- work dashboard와 Coordinator Brief에 들어갈 work focus 생성
+- 민감한 대화 원문, secret, credential, 개인 대화 전체를 저장하지 않도록 필터링
+
+### Project Status Model
+
+초기 상태값은 다음처럼 거짓 정밀도를 피하는 단계형 모델을 우선한다.
+
+```txt
+idea
+planning
+in_progress
+blocked
+review_needed
+shipped
+paused
+```
+
+숫자 progress는 dashboard 시각화를 위한 보조값으로만 사용한다. 최종 판단은 evidence, milestone, blocker, next action 중심으로 한다.
+
+### Output Files
+
+```txt
+data/work/projects.json
+data/work/codex-activity.jsonl
+data/work/project-progress.json
+reports/daily/YYYY-MM-DD-ai-work.md
+dashboard/work.json
+```
+
+### Initial Work Order
+
+1. `nomad-ai-work` Skill과 data contract를 먼저 고정한다.
+2. Codex 전역 지침에 안전한 activity event 원칙을 추가한다.
+3. `data/work/projects.json`에 추적할 프로젝트를 등록한다.
+4. `scripts/import_codex_activity.py`로 Codex/Git evidence를 local-first로 수집한다.
+5. Hermes daily run 또는 `npm run sync`에 importer를 연결한다.
+6. `dashboard/work.json`에 project KPI, progress, blockers, next actions를 표시한다.
+7. Hosted Dashboard는 Hermes가 publish한 snapshot만 읽고, Codex 원문 로그를 직접 읽지 않는다.
+
+### Forbidden
+
+- Codex 대화 원문 전체를 dashboard나 Supabase에 자동 업로드하지 않는다.
+- secret, credential, token, private key, 민감한 개인 대화를 저장하지 않는다.
+- 사용자가 승인하지 않은 외부 프로젝트 파일 수정이나 외부 앱 write-back을 하지 않는다.
+- 작업 시간을 성과의 유일한 기준으로 삼지 않는다.
+- 모든 프로젝트를 동시에 밀어붙이도록 강제하지 않는다.
+
+---
+
+## 9. nomad-health
 
 ### Role
 
@@ -865,6 +1052,8 @@ dashboard/work.json
 - 근력운동 디테일은 별도 workout form에서 빠르게 수동 입력한다.
 - Quick Capture의 `근력운동 시작`, `운동 기록` 같은 입력은 workout form 진입 트리거 또는 workout session 후보로 해석할 수 있다.
 - 구조화된 workout session은 capture와 분리해 저장하되, 요약 capture도 함께 남겨 audit trail을 유지한다.
+- Hosted Dashboard에서 운동 라이브러리 추가/수정/삭제 요청은 우선 Supabase queue로 보낸다.
+- Supabase RLS 정책이 아직 적용되지 않아 queue insert가 막히는 경우, 브라우저 localStorage에 pending mutation으로 임시 저장해 해당 기기에서는 즉시 사용할 수 있게 한다. 이 local fallback은 canonical data가 아니며, Supabase 정책 적용 후 Hermes Worker가 처리하는 queue 흐름으로 통합한다.
 
 ### Responsibilities
 
@@ -891,7 +1080,7 @@ dashboard/health.json
 
 ---
 
-## 9. nomad-travel-guide
+## 10. nomad-travel-guide
 
 ### Role
 
@@ -938,13 +1127,17 @@ dashboard/health.json
 
 ```txt
 data/travel/travel-context.json
+data/travel/current-stay.json
+data/travel/stays-index.json
+data/stays/{stay_id}/manifest.json
+data/backups/stays/{stay_id}/*.tar.gz
 reports/daily/YYYY-MM-DD-travel.md
 dashboard/travel.json
 ```
 
 ---
 
-## 10. nomad-creator
+## 11. nomad-creator
 
 ### Role
 
@@ -995,7 +1188,7 @@ dashboard/content.json
 
 ---
 
-## 11. nomad-english
+## 12. nomad-english
 
 ### Role
 
@@ -1009,6 +1202,12 @@ dashboard/content.json
 - 새로 배운 표현
 - 대화 메모
 - 음성 메모
+- GPTs 영어 학습 앱 리뷰 JSON
+- GPTs 영어 학습 앱 리뷰 Markdown
+- 학습 시간
+- 교정 내역
+- 복습 카드
+- 약점/강점 신호
 - 복습 여부
 - 자신감 점수
 - 여행/소셜/운동 일정
@@ -1019,7 +1218,33 @@ dashboard/content.json
 - 하루 체크인
 - 상황별 메모
 - GPT Voice 연습 요약
+- GPTs English review export
+- iCloud Drive English review folder: `/Users/jongiljeong/Library/Mobile Documents/com~apple~CloudDocs/Nomad_life/English`
+- `data/english/gpts-reviews/inbox/*.json`
+- `data/english/gpts-reviews/inbox/*.md`
 - 캘린더/여행 일정 기반 상황 추정
+
+현재 English Agent 방향:
+
+- 사용자가 GPTs로 만든 영어 학습 앱의 대화 후 리뷰 결과를 JSON/MD 파일로 받아 읽는다.
+- 현재 GPTs 영어 리뷰 원본 폴더는 `/Users/jongiljeong/Library/Mobile Documents/com~apple~CloudDocs/Nomad_life/English`다.
+- macOS/iCloud 권한 문제로 해당 폴더 직접 조회가 막힐 수 있으므로, 안정적인 local import 경로는 `data/english/gpts-reviews/inbox/`로 유지한다.
+- JSON은 에이전트 분석용 canonical data이며 Markdown은 사람이 읽는 sidecar review다.
+- GPTs가 JSON 파일을 따로 제공하지 못하고 Markdown 안에 `json` code block을 포함하는 경우도 fallback import로 허용한다.
+- GPTs 출력 지침은 `docs/gpts/ENGLISH_REVIEW_GPTS_INSTRUCTIONS.md`를 기준으로 한다.
+- 필수 분석 필드는 `duration_minutes`, `focus_area`, `learned_items`, `corrections`, `weak_points`, `next_actions`, `review_cards`다.
+- 대화 전문 전체는 기본 저장하지 않고 요약, 교정, 학습 항목 중심으로 저장한다.
+- 초기에는 파일 기반 read-only import만 수행하며 GPTs 원본 앱이나 외부 저장소를 수정하지 않는다.
+- English Agent는 단순한 학습 시간 tracker나 리뷰 viewer가 아니라 누적 학습 해석 agent다.
+- English Agent는 매일 쌓이는 리뷰 데이터를 누적해 학습 진도, 개선 신호, 반복 실수, 고쳐지지 않는 habit, 새로 배운 표현, 다음 훈련 focus를 발굴한다.
+- 장기 개선 판단은 데이터가 충분할 때만 한다. 데이터가 적을 때는 `candidate`, `watch`, `persistent`처럼 판단 강도를 구분한다.
+- English Agent의 핵심 review loop는 `문제 발견 -> 해결 제안 -> 다음 리뷰에서 재발 여부 확인 -> 다음 GPTs 세션에 사전 context 제공`이다.
+- 반복 correction, weak point, non-positive habit은 `issue_tracker`에 issue로 등록하고 `watch`, `active`, `persistent`, `improving`, `resolved_candidate` 상태로 관리한다.
+- 다음 GPTs 학습 전에는 `pre_study_context`를 생성해 GPTs가 active issue를 의도적으로 테스트하고 재발 여부를 구조화해 보고하도록 한다.
+- GPTs 리뷰 지침은 English Agent가 필요한 관찰 데이터를 얻기 위한 입력 계약이다. GPTs는 prose review뿐 아니라 `observations`, `issue_recurrence`, `new_issues`, `agent_feedback`을 제공해야 한다.
+- 성과 지표 그래프를 만들기 위해 GPTs는 매 세션 `performance_scores`와 주요 답변별 `turn_assessments`를 제공해야 한다. 평가 축은 어휘 정확도, 문장 구조, 자연스러운 표현, 질문 구조, 조동사/동사 구조, 유창성, 발음, listening, confidence다.
+- English Agent는 `not_seen`과 `not_tested`를 엄격히 구분한다. 명시적으로 테스트하지 않은 issue가 보이지 않았다는 이유만으로 개선 또는 해결로 판단하지 않는다.
+- GPTs 학습 세션의 기본 모드는 roleplay-only다. 사용자가 명시적으로 요청하지 않는 한 GPTs는 대화 중 바로 교정하거나 티칭하지 않고, 관찰한 내용을 세션 종료 후 리뷰 파일에만 기록한다.
 
 ### Responsibilities
 
@@ -1027,6 +1252,17 @@ dashboard/content.json
 - 실제 상황 기반 미니 롤플레이 생성
 - 자주 막히는 표현 정리
 - 복습 카드 생성
+- GPTs 리뷰 기반 학습 빈도 분석
+- GPTs 리뷰 기반 발전 내용 추적
+- 누적 `learning_profile` 생성
+- 반복 issue tracker 생성과 recurrence check 관리
+- GPTs 사전 입력용 `pre_study_context` 생성
+- 날짜별 progression, scenario coverage, learned inventory 생성
+- 고쳐지지 않는 반복 오류와 fossilized habit 후보 감지
+- 반복 약점과 다음 10분 학습 제안 생성
+- 주간 학습 빈도와 총 학습 시간 요약
+- 반복 habit 기반 deterministic 교정 추천 생성
+- GPTs review card를 복습 queue 후보로 정리
 - 피로도에 따른 학습량 조절
 - 여행/소셜 일정과 연동한 영어 미션 생성
 
@@ -1034,13 +1270,15 @@ dashboard/content.json
 
 ```txt
 data/english/english-notes.json
+data/english/gpts-reviews/inbox/*.json
+data/english/gpts-reviews/inbox/*.md
 reports/daily/YYYY-MM-DD-english.md
 dashboard/english.json
 ```
 
 ---
 
-## 12. nomad-rest
+## 13. nomad-rest
 
 ### Role
 
@@ -1088,7 +1326,7 @@ dashboard/rest.json
 
 ---
 
-## 13. nomad-weekly-review
+## 14. nomad-weekly-review
 
 ### Role
 
@@ -1127,7 +1365,7 @@ dashboard/life-balance.json
 
 ---
 
-## 14. nomad-dashboard-export
+## 15. nomad-dashboard-export
 
 ### Role
 
@@ -1151,6 +1389,81 @@ dashboard/budget.json
 dashboard/meal-balance.json
 dashboard/life-balance.json
 dashboard/actions.json
+```
+
+---
+
+## 16. nomad-ux-flow-review
+
+### Role
+
+Nomad Dashboard와 Quick Panels의 전체 사용자 흐름을 검증하는 UX Flow 검증 Skill이다.
+
+이 Skill은 임시 리뷰 프롬프트가 아니라, Dashboard 또는 입력 흐름이 변경될 때 Coordinator가 필요에 따라 호출하는 고정 검증 에이전트다.
+
+### Responsibilities
+
+- 사용자가 시작 지점과 다음 행동을 이해할 수 있는지 검증
+- Quick Capture, Dashboard, Action Center, Review 흐름의 끊김 감지
+- 저장/동기화/승인/오류 상태가 명확한지 검증
+- 모바일과 데스크톱 사용 흐름이 모두 성립하는지 확인
+- Dashboard가 Hermes Runtime을 대체하지 않고 입력, 확인, 승인, 시각화 UI 역할에 머무르는지 검증
+
+### Output Files
+
+```txt
+reports/validation/YYYY-MM-DD-ux-flow.md
+data/context/latest-validation.json
+```
+
+---
+
+## 17. nomad-gui-review
+
+### Role
+
+Nomad Dashboard와 Quick Panels의 시각적 구현 품질을 검증하는 GUI 검증 Skill이다.
+
+레이아웃 깨짐, 비합리적인 여백, 빈 공간, 마진 오류, 텍스트 겹침, 모바일 반응형 문제, 구현 중 생긴 비주얼 아티팩트를 확인한다.
+
+### Responsibilities
+
+- 데스크톱/모바일 레이아웃 깨짐 감지
+- 텍스트 겹침, 잘림, 과도한 줄바꿈, 버튼/입력 영역 접근성 확인
+- 카드, 패널, spacing, radius, shadow, token 사용이 Design System과 맞는지 확인
+- 화면 밀도와 빈 공간이 cockpit 사용성에 적합한지 검증
+- 개발 변경으로 발생한 시각적 회귀를 우선순위와 함께 보고
+
+### Output Files
+
+```txt
+reports/validation/YYYY-MM-DD-gui.md
+data/context/latest-validation.json
+```
+
+---
+
+## 18. nomad-review-value-review
+
+### Role
+
+Dashboard와 Review 화면의 콘텐츠 가치와 정보 밀도를 검증하는 Review Data Value 검증 Skill이다.
+
+리뷰 내용이 반복적이거나 무의미하게 길거나, 한눈에 전체 상황을 파악하기 어렵게 구성되는 문제를 감지한다.
+
+### Responsibilities
+
+- Coordinator Brief, Agent Council, Weekly Review, domain review card의 정보 가치 검증
+- 반복 문장, 일반론, filler, 과도한 길이 감지
+- 화면에 보이는 정보량과 전체 상황 파악 가능성 검증
+- 데이터 freshness, 불확실성, 리스크, 다음 행동이 충분히 명확한지 확인
+- 사용자가 깊게 읽기 전에 핵심 패턴을 스캔할 수 있는 콘텐츠 구조 제안
+
+### Output Files
+
+```txt
+reports/validation/YYYY-MM-DD-review-value.md
+data/context/latest-validation.json
 ```
 
 ---
@@ -1228,7 +1541,40 @@ focus_score
 source
 ```
 
-## 5. activities
+## 5. activity_sessions
+
+Activity Timeline은 모든 도메인 Agent가 공유하는 공통 시간 spine이다.
+
+```txt
+id
+created_at
+updated_at
+date
+start_time
+end_time
+duration_minutes
+area
+subcategory
+place
+detail
+source
+source_id
+linked_agents
+confidence
+review_required
+review_reason
+status
+metadata
+```
+
+원칙:
+
+- Nomad Quick PWA의 구조화 입력은 activity session을 우선 생성한다.
+- Health, Work, English, Creator, Travel 등 시간 기반 도메인은 activity session을 공통 입력으로 읽는다.
+- 자연어에서 추출한 activity session은 confidence와 review_required를 반드시 남긴다.
+- 도메인별 세부 데이터는 activity session에 연결하되, activity session 자체를 과도하게 복잡하게 만들지 않는다.
+
+## 6. health_activities
 
 ```txt
 id
@@ -1243,7 +1589,7 @@ source
 note
 ```
 
-## 6. places
+## 7. places
 
 ```txt
 id
@@ -1259,7 +1605,7 @@ visit_count
 note
 ```
 
-## 7. content_ideas
+## 8. content_ideas
 
 ```txt
 id
@@ -1274,7 +1620,7 @@ related_place
 note
 ```
 
-## 8. english_notes
+## 9. english_notes
 
 ```txt
 id
@@ -1287,7 +1633,7 @@ source
 note
 ```
 
-## 9. agent_reports
+## 10. agent_reports
 
 ```txt
 id
@@ -1302,7 +1648,7 @@ data_sources
 confidence
 ```
 
-## 10. daily_briefs
+## 11. daily_briefs
 
 ```txt
 id
@@ -1316,7 +1662,7 @@ missions
 visualization_data
 ```
 
-## 11. weekly_reviews
+## 12. weekly_reviews
 
 ```txt
 id

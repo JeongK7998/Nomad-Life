@@ -8,7 +8,7 @@ Dashboard JSON files should include:
 
 ```json
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "generated_at": "ISO-8601",
   "data_quality": {
     "status": "empty | partial | complete",
@@ -49,12 +49,114 @@ Dashboard snapshot records:
 
 ```json
 {
-  "snapshot_key": "today | health | life-balance | activity-allocation | notifications | workout-history | sync-status",
+  "snapshot_key": "today | health | english | life-balance | activity-allocation | notifications | finance-review | workout-history | input-history | sync-status",
   "snapshot_date": "YYYY-MM-DD | null",
   "schema_version": "0.1.0",
   "payload": {},
   "source": "mac_hermes_worker"
 }
+```
+
+## Input History Ledger
+
+`Input History` is the user-facing input ledger view. It is not a raw queue monitor and it is not the same thing as Mac Hermes analysis.
+
+Core principle:
+
+```txt
+Input reflection should happen immediately.
+Mac Hermes analysis may happen later.
+```
+
+That means a hosted/mobile input can be saved into the Supabase input ledger while the Mac is offline. The Mac Hermes Worker remains responsible for analysis, interpretation, dashboard/report generation, and private local-context joins.
+
+The view combines:
+
+- direct user inputs from Nomad Quick, Workout Quick, Telegram explicit capture, or Dashboard forms
+- import/load events that the user initiated or explicitly configured
+- local browser receipts for inputs that were just saved but not yet mirrored into the canonical input ledger
+- normalized capture records from `data/captures/*.jsonl`
+- normalized activity records from `data/activity/activity-sessions.jsonl`
+- normalized workout records from `data/health/workout-sessions.jsonl`
+- batch import summaries for files such as English GPTs reviews or finance exports
+
+Status meaning:
+
+```txt
+입력됨: the direct user input is stored in the input ledger.
+로딩됨: an external file or batch source was received/copied and is visible to Nomad Life.
+정규화됨: loaded source data was converted into a Nomad Life normalized data contract.
+분석 대기: the input/loading event exists, but Mac Hermes has not yet analyzed it into dashboard/report outputs.
+분석됨: Mac Hermes has consumed the record and reflected it in dashboard/report outputs.
+확인 필요: the user or Coordinator should review classification, date, duration, duplicate risk, parse quality, or import errors.
+제외됨: the record is intentionally ignored/excluded from analysis.
+```
+
+Required fields for every Input History item:
+
+```json
+{
+  "id": "input_* | import_* | source-specific id",
+  "input_kind": "direct | import | context | evidence | settings",
+  "domain": "work | ai_work | health | english | finance | food | travel | creator | rest | context | system",
+  "method": "nomad_quick | workout_quick | telegram_explicit_capture | dashboard_form | file_import | icloud_dropbox | local_context_refresh | codex_evidence_import | settings_form",
+  "created_at": "ISO-8601",
+  "event_date": "YYYY-MM-DD | null",
+  "title": "short user-visible title",
+  "summary": "short sanitized summary",
+  "input_status": "입력됨 | 로딩됨 | 정규화됨 | 확인 필요 | 제외됨",
+  "analysis_status": "분석 대기 | 분석됨 | 분석 제외 | 확인 필요",
+  "source_ref": "path, queue id, local id, or null",
+  "canonical_ref": "normalized record id/path or null",
+  "client_submission_id": "stable id for direct hosted/mobile submissions or null",
+  "requires_user_review": false,
+  "privacy_level": "normal | sensitive | private_local_only"
+}
+```
+
+The Dashboard should reconcile local receipts with normalized results. New hosted/mobile submissions should carry a stable `client_submission_id` in the direct input payload and in the normalized result. Once a matching normalized result exists, the local receipt becomes a hidden shadow receipt in the default `현재 원장` and `대기/확인 필요` views. `모두 보기` may still show shadow receipts for debugging, but they are not separate life records.
+
+For legacy records without `client_submission_id`, the Dashboard may hide same-date local health receipts when a matching health activity or workout result exists. This prevents duplicate health rows after the worker processes a mobile workout.
+
+Input History inclusion rules:
+
+| Source | Include In Input History | Display Grain | Default Status |
+|---|---:|---|---|
+| Nomad Quick work / AI work time input | yes | one direct activity input | 입력됨 · 분석 대기 |
+| Nomad Quick health time/type input | yes | one direct activity input | 입력됨 · 분석 대기 |
+| Workout Quick strength detail input | yes | one direct workout input | 입력됨 · 분석 대기 |
+| Nomad Quick English study time input | yes | one direct activity input | 입력됨 · 분석 대기 |
+| English GPTs review file import | yes | one batch/file import event | 로딩됨 or 정규화됨 · 분석 대기 |
+| Finance app export import | yes | one batch/file import event, not every transaction row | 로딩됨 or 정규화됨 · 분석 대기 |
+| Quick food/meal input | yes | one direct activity/capture input | 입력됨 · 분석 대기 |
+| Telegram explicit capture | yes | one direct capture input | 입력됨 · 분석 대기 |
+| Calendar context refresh | no by default | show in Data Sources | 로딩됨 · 분석됨/대기 |
+| Notes context refresh | no by default | show in Data Sources | 로딩됨 · 분석됨/대기 |
+| Codex/Git work evidence import | no by default | show in Work Evidence / Data Sources | 정규화됨 · 분석 대기 |
+| Exercise library settings changes | no by default | show in Settings/Library log | 입력됨 |
+| Dashboard snapshot publish | no | show in Sync Status | 분석됨 |
+
+Relationship rules:
+
+| Relationship | Rule |
+|---|---|
+| English study time input and English GPTs review file | Do not auto-match. Time input is an activity record. Review file is a separate import/review record. |
+| Finance export rows and Quick expense-like memo | Do not auto-match by default. Finance export remains the canonical finance ledger source; Quick memo may become an expense candidate only. |
+| Health quick time/type and workout detail | Match only when they originate from the same explicit user submission or share a stable source id. |
+| Calendar/Notes context and direct inputs | Do not merge. Mac Hermes may use them as analysis context only. |
+| Codex evidence and AI work time input | Do not merge. Time input is a manual activity record; Codex evidence is project-progress evidence. |
+
+Recommended UI grouping:
+
+```txt
+Input History
+  Direct inputs + import/load events
+
+Data Sources
+  Calendar, Notes, Finance export status, English review folder, Codex/Git evidence status
+
+Analysis Status
+  Mac Hermes analysis freshness, dashboard/report generation, snapshot publish state
 ```
 
 Sync log records:
@@ -157,6 +259,66 @@ data/context/latest-captures.json
 
 Used by downstream skills to avoid scanning every capture file.
 
+## Activity Sessions
+
+Path:
+
+```txt
+data/activity/activity-sessions.jsonl
+```
+
+Activity Sessions are the shared timeline spine for Nomad Life. Nomad Quick PWA should create these records for structured activity input. Domain-specific records, such as workout details or English transcript notes, should link back to activity sessions instead of replacing them.
+
+Each line is one activity session.
+
+Required fields:
+
+```json
+{
+  "id": "activity_YYYYMMDD_HHMMSS_slug",
+  "created_at": "ISO-8601",
+  "updated_at": "ISO-8601",
+  "date": "YYYY-MM-DD",
+  "start_time": "HH:MM | null",
+  "end_time": "HH:MM | null",
+  "duration_minutes": 0,
+  "area": "work | health | food | english | creator | travel | social | rest | admin | unclassified",
+  "subcategory": "string | null",
+  "place": "string | null",
+  "detail": "string",
+  "source": "nomad_quick | quick_capture | telegram_candidate | import | dashboard_edit",
+  "source_id": "string | null",
+  "linked_agents": [],
+  "confidence": 0.0,
+  "review_required": false,
+  "review_reason": "string | null",
+  "status": "active | completed | candidate | corrected | ignored",
+  "metadata": {}
+}
+```
+
+Time rules:
+
+- `active` sessions may have `start_time` without `end_time`.
+- Completed sessions should have either `start_time` and `end_time`, or `duration_minutes`.
+- Natural-language extraction must set `review_required: true` unless confidence is high and the time/category fields are unambiguous.
+- Domain modules may add linked details, but the Activity Session remains the common cross-agent record.
+
+Initial area taxonomy:
+
+```txt
+work
+health
+food
+english
+creator
+travel
+social
+rest
+admin
+unclassified
+```
+
 ## Local App Context
 
 Local app context snapshots are read-only normalized exports from macOS apps. They must live under:
@@ -223,6 +385,181 @@ data/expenses/normalized-expenses.json
 ```
 
 Contains an array of normalized expense records plus metadata.
+
+Canonical finance input comes from the user's existing finance app through read-only app/server access, automated export/download, or manual JSON export fallback. Nomad Life does not replace the finance app as the ledger.
+
+Manual JSON exports should land in:
+
+```txt
+data/expenses/imports/inbox/*.json
+```
+
+Current read-only iCloud source folder:
+
+```txt
+/Users/jongiljeong/Library/Mobile Documents/com~apple~CloudDocs/Nomad_life/Finance
+```
+
+Current importer:
+
+```txt
+scripts/import_finance_exports.py
+```
+
+The current export source is Nomad Pocket JSON. Its top-level shape is:
+
+```json
+{
+  "version": "1.0.4",
+  "exportedAt": "ISO-8601",
+  "data": {
+    "categories": [],
+    "subcategories": [],
+    "payment_methods": [],
+    "regions": [],
+    "tags": [],
+    "transactions": [],
+    "fixed_items": [],
+    "budgets": []
+  }
+}
+```
+
+Processed source copies may be archived under:
+
+```txt
+data/expenses/imports/processed/YYYY-MM-DD/*.json
+```
+
+The local importer should preserve the raw source record enough to trace each normalized expense back to the original export. It must not write changes back to the original finance app, server, or iCloud source folder without explicit user approval.
+
+Recommended normalized record shape:
+
+```json
+{
+  "id": "expense_*",
+  "date": "YYYY-MM-DD",
+  "posted_at": "ISO-8601 | null",
+  "amount": 0,
+  "currency": "KRW | USD | IDR | JPY | EUR",
+  "exchange_rate": null,
+  "category": "food | cafe | transport | lodging | activity | tools | health | shopping | other | null",
+  "subcategory": null,
+  "merchant": null,
+  "place": null,
+  "country": null,
+  "payment_method": null,
+  "satisfaction": null,
+  "required_or_optional": "required | optional | unknown | null",
+  "note": "",
+  "source": "finance_export:<filename>:<source_id>",
+  "source_app": null,
+  "raw_hash": "sha256"
+}
+```
+
+Finance analysis outputs should focus on spend status, category mix, recurring patterns, budget pressure, location/travel-driven spikes, missing days, duplicate risks, and practical adjustment suggestions.
+
+```txt
+dashboard/finance-review.json
+```
+
+Contains a Dashboard-safe Finance analysis snapshot generated from `normalized-expenses.json`. The Mac worker publishes this as the `finance-review` Supabase dashboard snapshot so Hosted Dashboard and mobile clients can show the same latest Finance analysis without needing direct access to the local normalized ledger file.
+
+## Stay Packages And Backups
+
+Canonical working files remain in:
+
+```txt
+data/
+dashboard/
+reports/
+```
+
+When the user changes region or starts a meaningful stay, Nomad Life should also create a local stay package.
+
+Current active stay:
+
+```txt
+data/travel/current-stay.json
+```
+
+Shape:
+
+```json
+{
+  "schema_version": "0.1.0",
+  "updated_at": "ISO-8601",
+  "stay_id": "bali-2026-05",
+  "region": "Bali",
+  "country": "Indonesia",
+  "timezone": "Asia/Makassar",
+  "start_date": "YYYY-MM-DD",
+  "end_date": null,
+  "status": "active | closed",
+  "local_package_path": "data/stays/bali-2026-05",
+  "backup_root": "data/backups/stays/bali-2026-05",
+  "notes": []
+}
+```
+
+Stay index:
+
+```txt
+data/travel/stays-index.json
+```
+
+Shape:
+
+```json
+{
+  "schema_version": "0.1.0",
+  "updated_at": "ISO-8601",
+  "active_stay_id": "bali-2026-05",
+  "stays": [
+    {
+      "stay_id": "bali-2026-05",
+      "region": "Bali",
+      "country": "Indonesia",
+      "timezone": "Asia/Makassar",
+      "start_date": "YYYY-MM-DD",
+      "end_date": null,
+      "status": "active | closed",
+      "dataset_scope": "current | all",
+      "local_package_path": "data/stays/bali-2026-05",
+      "backup_root": "data/backups/stays/bali-2026-05",
+      "updated_at": "ISO-8601",
+      "note": ""
+    }
+  ]
+}
+```
+
+The active stay is the default attribution target for new captures, activities, workouts, daily reports, and stay packages. Closed stays remain available for future review pages that compare spending, time allocation, health activity, English practice, and work signals across regions or months.
+
+Stay package:
+
+```txt
+data/stays/{stay_id}/manifest.json
+data/stays/{stay_id}/snapshot/**
+```
+
+The manifest records package metadata, copied source roots, copied file paths, and privacy flags. The snapshot is a local grouped copy for review, migration, and backup; it is not the canonical write target for day-to-day tools.
+
+Backup:
+
+```txt
+data/backups/stays/{stay_id}/{stay_id}-YYYYMMDD-HHMMSS.tar.gz
+```
+
+Backups are local-first and may contain personal data. They must not be uploaded to cloud storage or external services without explicit user approval.
+
+Current helper:
+
+```txt
+scripts/package_stay_data.py
+npm run stay:package
+```
 
 ## Expense Candidates
 
@@ -412,6 +749,173 @@ Out of initial parser scope:
 - Calendar reconciliation
 - Automatic correction UI
 - Multi-day time spans
+
+## GPTs English Reviews
+
+Path:
+
+```txt
+data/english/gpts-reviews/inbox/*.json
+data/english/gpts-reviews/inbox/*.md
+```
+
+GPTs English review JSON files are structured imports from a user-created GPTs English learning app. JSON is the canonical agent input. Markdown is a human-readable sidecar.
+
+Current source folder for the user's GPTs English review exports:
+
+```txt
+/Users/jongiljeong/Library/Mobile Documents/com~apple~CloudDocs/Nomad_life/English
+```
+
+Because macOS/iCloud permissions can block direct reads from this folder, the stable agent import path remains `data/english/gpts-reviews/inbox/`.
+
+Instruction template:
+
+```txt
+docs/gpts/ENGLISH_REVIEW_GPTS_INSTRUCTIONS.md
+```
+
+Required JSON shape:
+
+```json
+{
+  "schema_version": "0.1.0",
+  "source": "gpts_english_review",
+  "session_id": "gpts_english_YYYYMMDD_HHMM",
+  "date": "YYYY-MM-DD",
+  "started_at": "ISO-8601 | null",
+  "ended_at": "ISO-8601 | null",
+  "duration_minutes": 0,
+  "app_name": "",
+  "conversation_title": "",
+  "input_modes": ["voice", "text"],
+  "focus_area": "conversation | pronunciation | vocabulary | grammar | travel | small_talk | work | review",
+  "level": "beginner | intermediate | advanced | unknown",
+  "user_goal": "",
+  "transcript_summary": "",
+  "markdown_file": "english-review-YYYY-MM-DD-HHMM.md",
+  "metrics": {
+    "turn_count": 0,
+    "user_message_count": 0,
+    "assistant_message_count": 0,
+    "estimated_speaking_minutes": 0
+  },
+  "study_context": {
+    "pre_study_context_used": false,
+    "target_issue_ids": [],
+    "planned_scenario": "",
+    "actual_scenario": "",
+    "scenario_success": "completed | partial | changed | unknown"
+  },
+  "observations": [],
+  "performance_scores": {
+    "scale": "0-100",
+    "session_scores": {},
+    "score_evidence": []
+  },
+  "turn_assessments": [],
+  "learned_items": [],
+  "corrections": [],
+  "weak_points": [],
+  "habit_patterns": [],
+  "strengths": [],
+  "next_actions": [],
+  "review_cards": [],
+  "issue_recurrence": [],
+  "new_issues": [],
+  "agent_feedback": {
+    "progress_signals": [],
+    "unresolved_issues": [],
+    "resolved_candidate_issues": [],
+    "next_session_should_test": []
+  },
+  "tags": []
+}
+```
+
+Import rules:
+
+- The JSON file must not include a full sensitive transcript by default.
+- Markdown review files may include a `json` codeblock as a fallback when GPTs cannot provide a separate JSON file.
+- `duration_minutes` is required for frequency and workload analysis.
+- `learned_items`, `corrections`, `weak_points`, `next_actions`, and `review_cards` should be structured arrays, not prose-only text.
+- `observations` should contain the machine-readable event log for corrections, weak points, habits, strengths, learned items, and issue tests.
+- `performance_scores` and `turn_assessments` are required for real performance trend graphs. If absent, English Agent falls back to derived issue-observation scores.
+- `issue_recurrence` should be present whenever the previous `pre_study_context` was used. It must distinguish `not_seen` from `not_tested`.
+- `new_issues` should list newly detected issue candidates with stable `fingerprint_hint` values.
+- The English Agent reads these files into `data/english/english-notes.json` and `dashboard/english.json`.
+- This import is read-only. It does not modify the source GPTs app or external files.
+
+`dashboard/english.json` may additionally expose:
+
+```json
+{
+  "import_status": {
+    "status": "empty | ok | warning | error",
+    "json_file_count": 0,
+    "imported_count": 0,
+    "validation_error_count": 0,
+    "validation_warning_count": 0
+  },
+  "weekly_summary": {
+    "window": {
+      "start_date": "YYYY-MM-DD",
+      "end_date": "YYYY-MM-DD",
+      "days": 7
+    },
+    "review_session_count": 0,
+    "activity_session_count": 0,
+    "active_day_count": 0,
+    "study_minutes": 0,
+    "top_habit_tags": [],
+    "top_weak_points": [],
+    "correction_goal": null
+  },
+  "habit_recommendations": [],
+  "review_card_queue": [],
+  "learning_profile": {
+    "status": "empty | active",
+    "agent_interpretation": "",
+    "scope": {
+      "first_date": "YYYY-MM-DD",
+      "last_date": "YYYY-MM-DD",
+      "review_session_count": 0,
+      "active_day_count": 0,
+      "study_minutes": 0,
+      "focus_areas": []
+    },
+    "progression": [],
+    "improvement_signals": [],
+    "persistent_issues": [],
+    "correction_insights": [],
+    "correction_examples": [],
+    "learned_inventory": [],
+    "next_focus": []
+  },
+  "issue_tracker": {
+    "status": "empty | active",
+    "algorithm_version": "0.1.0",
+    "review_session_count": 0,
+    "latest_session_id": "",
+    "issues": [],
+    "recurrence_checks": []
+  },
+  "pre_study_context": {
+    "status": "empty | ready",
+    "active_issue_count": 0,
+    "prompt": "",
+    "active_issues": []
+  }
+}
+```
+
+`habit_recommendations` are deterministic coaching suggestions generated from repeated `habit_tags` and `habit_patterns`. `review_card_queue` is a lightweight queue generated from GPTs `review_cards`; it is not yet a spaced-repetition scheduler.
+
+`learning_profile` is the English Agent's cumulative interpretation layer. It should read all available GPTs review records up to the target date and surface progress, repeated unresolved issues, learned material, and the next training focus. It must not claim long-term improvement when the data window is too small.
+
+`issue_tracker` is the specialized review loop. It detects repeated corrections, weak points, and non-positive habits as issues, assigns lifecycle status, keeps evidence examples, and creates recurrence checks for later reviews.
+
+`pre_study_context` is a copyable prompt for the next GPTs study session. It tells GPTs which active issues to test and how to report whether each issue reappeared.
 
 ## Health Summary
 

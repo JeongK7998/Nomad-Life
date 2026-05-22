@@ -4,8 +4,22 @@
   "private": true,
   "scripts": {
     "build": "echo \"Static Nomad Dashboard: no build step\"",
+    "work:import": "scripts/import_codex_activity.py",
+    "work:import:dry": "scripts/import_codex_activity.py --dry-run",
     "sync": "scripts/run_nomad_sync.py",
     "sync:dry": "scripts/run_nomad_sync.py --dry-run",
-    "sync:watch": "scripts/run_nomad_sync.py --watch --interval 300"
+    "sync:watch": "scripts/run_nomad_sync.py --watch --interval 300",
+    "stay:package": "scripts/package_stay_data.py",
+    "validate": "scripts/run_validation.py",
+    "validate:all": "scripts/run_validation.py",
+    "validate:setup": "scripts/run_validation.py --setup-only",
+    "validate:serve": "scripts/run_validation.py --serve-only",
+    "validate:preview": "scripts/run_validation.py --preview",
+    "validate:ux": "scripts/run_validation.py",
+    "validate:visual": "scripts/run_validation.py",
+    "validate:data": "scripts/run_validation.py"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
   }
 }

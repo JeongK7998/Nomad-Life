@@ -26,6 +26,7 @@ PUBLIC_FIELDS = {
     "source_url",
     "image_url",
     "images",
+    "display_order",
 }
 
 
@@ -45,7 +46,13 @@ def main() -> None:
     payload = {
         "schema_version": source.get("schema_version", "0.1.0"),
         "source": "local_public_export",
-        "exercises": sorted(public_exercises, key=lambda item: item.get("name_ko") or item.get("name_en") or item["id"]),
+        "exercises": sorted(
+            public_exercises,
+            key=lambda item: (
+                int(item.get("display_order") if item.get("display_order") is not None else 9999),
+                item.get("name_ko") or item.get("name_en") or item["id"],
+            ),
+        ),
     }
     TARGET_PATH.parent.mkdir(parents=True, exist_ok=True)
     TARGET_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

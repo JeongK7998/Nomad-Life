@@ -73,6 +73,10 @@ Numbers in dashboard cards should use `font-variant-numeric: tabular-nums`.
 
 - Use a persistent sidebar on desktop.
 - Use a single-column stacked layout on mobile.
+- Use single-column stacked layout as the default for each major content section on all viewport sizes. Do not force unrelated sections into two columns just because horizontal space exists.
+- Use two-column or multi-column layout only inside compact repeated content, such as KPI cards, small metric boxes, chips, legends, and short repeated cards that do not need full-width reading space.
+- Do not use CSS column or masonry-like flow for dashboard panels with variable-height content. Long panels such as logs and reviews must stay in normal grid/block flow so they never overlap or fragment across columns.
+- Repeated cards that users compare against each other should live in one shared grid per comparison group, not separate side-by-side grids, so row heights and visual rhythm stay aligned.
 - Keep section padding around 20-24px.
 - Use 12-16px gaps inside panels.
 - Avoid nested cards unless the inner card is a repeated item.
@@ -111,6 +115,8 @@ Inputs use a white or elevated background, 1px neutral border, 8px radius, and b
 
 Cards use `--background-normal`, `--line-neutral`, 12px radius, and no shadow by default.
 
+Routine and log cards should prioritize at-a-glance comprehension over decorative spacing. For workout routine cards, the header should keep muscle/date/total-set metadata in one compact row, and the body should fit a normal session of roughly five exercises with four sets each without requiring vertical scrolling.
+
 ### Badges
 
 Badges are compact, 18-24px height, 4-999px radius depending on use. Status color should be rare and meaningful.
@@ -130,3 +136,5 @@ Charts should use restrained color. Primary blue can represent active/focus stat
 ## Governance
 
 When the visual language changes, update this file and the web token file together. If a proposed design makes the product feel like a marketing site, career app, or generic SaaS dashboard, pause and review against `AGENTS.md`.
+
+For UI changes that affect Dashboard workspaces, Quick Panels, or review-card presentation, run the relevant validation Skills from `docs/UX_VALIDATION_AGENTS.md`. Use `nomad-gui-review` for visual layout quality, `nomad-ux-flow-review` for task flow, and `nomad-review-value-review` for content density and usefulness.

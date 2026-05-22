@@ -114,6 +114,36 @@ Rules:
 - Preserve uncertainty from partial snapshots.
 - Treat Telegram as conversation/notification, not durable storage.
 
+Coordinator Chat should expand its read scope as each local data contract becomes available. The target read set is:
+
+```txt
+AGENTS.md
+docs/COMMUNICATION_LAYER.md
+skills/nomad-coordinator/SKILL.md
+dashboard/today.json
+dashboard/life-balance.json
+dashboard/activity-allocation.json
+dashboard/health.json
+dashboard/english.json
+dashboard/budget.json
+dashboard/meal-balance.json
+dashboard/weekly.json
+data/activity/activity-sessions.jsonl
+data/context/latest-captures.json
+data/context/agent-reports.json
+data/context/calendar-context.json
+data/context/notes-context.json
+data/captures/YYYY-MM-DD.jsonl
+data/health/workout-sessions.jsonl
+data/expenses/normalized-expenses.json
+data/meals/normalized-meals.json
+data/english/english-notes.json
+reports/daily/YYYY-MM-DD-brief.md
+reports/weekly/*.md
+```
+
+Files that do not exist yet should be treated as unavailable, not as empty truth. The Coordinator must keep those gaps visible in its answer.
+
 See:
 
 ```txt

@@ -8,13 +8,14 @@ import json
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
+from time_utils import local_timezone
 
 from capture_store import read_captures
+from activity_store import read_activity_sessions
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-TIMEZONE = ZoneInfo("Asia/Seoul")
+TIMEZONE = local_timezone()
 
 
 AGENT_LABELS = {
@@ -45,7 +46,7 @@ LIFE_AREAS = {
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate Nomad Life daily brief.")
-    parser.add_argument("--date", help="Date to process in YYYY-MM-DD. Defaults to today in Asia/Seoul.")
+    parser.add_argument("--date", help="Date to process in YYYY-MM-DD. Defaults to today in configured local timezone.")
     return parser.parse_args()
 
 
@@ -115,6 +116,47 @@ def council_item_from_report(report: dict) -> dict:
         "data_sources": report.get("data_sources", []),
         "confidence": report.get("confidence", 0.0),
     }
+
+
+def report_has_signal(report: dict) -> bool:
+    summary = report.get("summary") or {}
+    agent = report.get("agent_name")
+    if agent == "nomad-english":
+        return bool(summary.get("study_minutes") or summary.get("reviewed_session_count"))
+    if agent == "nomad-health":
+        return bool(summary.get("exercise_minutes") or summary.get("structured_workout_count") or summary.get("strength_set_count"))
+    if agent == "nomad-work":
+        return bool(summary.get("work_minutes") or summary.get("session_count"))
+    if agent == "nomad-creator":
+        return bool(summary.get("creator_minutes") or summary.get("session_count"))
+    return report.get("status") not in {"empty", "unknown", None}
+
+
+def strongest_report_signal(reports: list[dict]) -> str:
+    ranked = sorted(
+        [report for report in reports if report_has_signal(report)],
+        key=lambda item: (item.get("score") or 0, item.get("confidence") or 0),
+        reverse=True,
+    )
+    if not ranked:
+        return "새로 확인된 강한 domain signal은 아직 없습니다."
+    report = ranked[0]
+    summary = report.get("summary") or {}
+    if report.get("agent_name") == "nomad-english":
+        return f"English: GPTs 리뷰 {summary.get('reviewed_session_count', 0)}개 / {summary.get('study_minutes', 0)}분"
+    if report.get("agent_name") == "nomad-health":
+        return f"Health: 근력 세트 {summary.get('strength_set_count', 0)}개 / 운동 {summary.get('exercise_minutes', 0)}분"
+    return f"{AGENT_LABELS.get(report.get('agent_name'), report.get('agent_name'))}: {report.get('insight') or '신호 확인'}"
+
+
+def stale_or_empty_agents(reports: list[dict]) -> list[str]:
+    stale = []
+    for report in reports:
+        if report_has_signal(report):
+            continue
+        label = AGENT_LABELS.get(report.get("agent_name"), report.get("agent_name", "Agent"))
+        stale.append(label)
+    return stale[:4]
 
 
 def summarize_agent(agent: str, count: int, captures: list[dict], contexts: dict | None = None) -> dict:
@@ -191,9 +233,11 @@ def summarize_agent(agent: str, count: int, captures: list[dict], contexts: dict
 
 
 def build_outputs(date: str, now: datetime, captures: list[dict]) -> tuple[dict, dict, str]:
+    activities = read_activity_sessions(date)
     agent_counts = Counter(agent for capture in captures for agent in capture.get("linked_agents", []))
     reports = read_agent_reports(date)
     reported_agents = {report.get("agent_name") for report in reports}
+    report_by_agent = {report.get("agent_name"): report for report in reports}
     calendar_context = read_context("calendar-context")
     notes_context = read_context("notes-context")
     contexts = {
@@ -235,7 +279,8 @@ def build_outputs(date: str, now: datetime, captures: list[dict]) -> tuple[dict,
         focus_today = ["오늘의 상태를 한 줄로 기록"]
 
     let_go_today = ["모든 영역을 한 번에 맞추려는 부담"]
-    if agent_counts["nomad-english"]:
+    english_summary = (report_by_agent.get("nomad-english") or {}).get("summary", {})
+    if agent_counts["nomad-english"] or english_summary.get("study_minutes"):
         let_go_today.append("영어를 길게 보충하려는 계획")
 
     risks = []
@@ -282,9 +327,26 @@ def build_outputs(date: str, now: datetime, captures: list[dict]) -> tuple[dict,
         "내일 이어갈 작업의 첫 액션 한 줄 적기",
     ]
 
+    total_activity_minutes = sum(int(activity.get("duration_minutes") or 0) for activity in activities)
+    english_review_count = int(english_summary.get("reviewed_session_count") or 0)
+    english_study_minutes = int(english_summary.get("study_minutes") or 0)
+    strongest_signal = strongest_report_signal(reports)
+    stale_agents = stale_or_empty_agents(reports)
+    delta_items = [
+        f"Nomad Quick activity session {len(activities)}개 / {total_activity_minutes}분",
+        strongest_signal,
+    ]
+    if stale_agents:
+        delta_items.append(f"stale 또는 empty agent: {', '.join(stale_agents)}")
     summary = (
-        f"{date}에는 {len(captures)}개의 capture가 기록되었습니다. "
-        "아직 데이터는 적지만 Coordinator는 작업, 식사, 지출, 회복 신호를 중심으로 오늘을 조율합니다."
+        f"{date}에는 capture {len(captures)}개와 Nomad Quick activity session {len(activities)}개가 기록되었습니다. "
+        f"구조화 활동 시간은 {total_activity_minutes}분입니다. "
+        + (
+            f"별도 domain signal로 English 리뷰 {english_review_count}개 / {english_study_minutes}분이 확인되었습니다. "
+            if english_review_count or english_study_minutes
+            else ""
+        )
+        + "Coordinator는 구조화 활동과 domain agent 신호를 분리해서 해석합니다."
     )
 
     today = {
@@ -292,15 +354,20 @@ def build_outputs(date: str, now: datetime, captures: list[dict]) -> tuple[dict,
         "generated_at": now.isoformat(),
         "date": date,
         "data_quality": {
-            "status": "partial" if captures else "empty",
+            "status": "partial" if captures or activities or reports else "empty",
             "notes": [
-                "Generated from local captures only.",
+                "Generated from local captures, structured activity sessions, and thin agent reports.",
                 "Calendar and Notes contexts are optional read-only local app snapshots.",
-                "Health and English agent reports are thin capture-based reports.",
+                "Health, Work, Creator, and English agent reports are thin early reports.",
                 "Sheet, HealthKit, and transcript integrations are not connected yet.",
             ],
         },
         "summary": summary,
+        "daily_delta": {
+            "items": delta_items,
+            "strongest_signal": strongest_signal,
+            "stale_or_empty_agents": stale_agents,
+        },
         "focus_today": focus_today[:3],
         "let_go_today": let_go_today,
         "risks": risks,
@@ -332,15 +399,16 @@ def build_outputs(date: str, now: datetime, captures: list[dict]) -> tuple[dict,
     areas = []
     for area, agent in LIFE_AREAS.items():
         count = agent_counts[agent]
-        score = min(5, max(1, count + 1))
+        report = report_by_agent.get(agent) or {}
+        score = int(report.get("score") or min(5, max(1, count + 1)))
         intent = "unknown"
-        if agent == "nomad-work" and count:
+        if agent == "nomad-work" and (count or report_has_signal(report)):
             intent = "focus"
-        elif agent in {"nomad-rest", "nomad-health", "nomad-food", "nomad-finance"} and count:
+        elif agent in {"nomad-rest", "nomad-health", "nomad-food", "nomad-finance"} and (count or report_has_signal(report)):
             intent = "watch"
-        elif agent == "nomad-english" and count:
+        elif agent == "nomad-english" and (count or report_has_signal(report)):
             intent = "let_go_lightly"
-        elif agent == "nomad-creator" and count:
+        elif agent == "nomad-creator" and (count or report_has_signal(report)):
             intent = "optional"
         areas.append({"name": area, "score": score, "intent": intent})
 
@@ -349,8 +417,8 @@ def build_outputs(date: str, now: datetime, captures: list[dict]) -> tuple[dict,
         "generated_at": now.isoformat(),
         "date": date,
         "data_quality": {
-            "status": "partial" if captures else "empty",
-            "notes": ["Scores are based on capture frequency, not complete behavioral data."],
+            "status": "partial" if captures or activities or reports else "empty",
+            "notes": ["Scores are based on capture frequency and thin agent reports, not complete behavioral data."],
         },
         "areas": areas,
     }
@@ -361,6 +429,10 @@ def build_outputs(date: str, now: datetime, captures: list[dict]) -> tuple[dict,
         "## Summary",
         "",
         summary,
+        "",
+        "## Daily Delta",
+        "",
+        *[f"- {item}" for item in delta_items],
         "",
         "## Focus Today",
         "",

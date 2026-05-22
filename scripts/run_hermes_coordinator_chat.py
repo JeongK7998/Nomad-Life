@@ -38,12 +38,26 @@ def prompt_for(date: str, message: str) -> str:
 - 필요하면 다음 파일을 참고해:
   - dashboard/today.json
   - dashboard/life-balance.json
+  - dashboard/activity-allocation.json
+  - dashboard/health.json
+  - dashboard/english.json
+  - dashboard/budget.json
+  - dashboard/meal-balance.json
+  - dashboard/weekly.json
+  - data/activity/activity-sessions.jsonl
   - data/context/latest-captures.json
+  - data/context/agent-reports.json
   - data/context/calendar-context.json
   - data/context/notes-context.json
   - data/captures/{date}.jsonl
+  - data/health/workout-sessions.jsonl
+  - data/expenses/normalized-expenses.json
+  - data/meals/normalized-meals.json
+  - data/english/english-notes.json
   - reports/daily/{date}-brief.md
   - reports/daily/{date}-hermes-draft.md
+  - reports/weekly/*.md
+- 존재하지 않는 파일은 비어 있는 진실이 아니라 아직 unavailable한 데이터로 다뤄.
 - Calendar/Notes는 read-only partial snapshot일 수 있다. data_quality.status를 확인하고 과장하지 마.
 - Health, Sheets, Photos, Reminders, Telegram notification은 아직 연결된 것처럼 말하지 마.
 - 사용자를 통제하지 말고, 선택지를 줄이고 조율해.

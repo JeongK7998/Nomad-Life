@@ -8,11 +8,11 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
+from time_utils import local_timezone
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-TIMEZONE = ZoneInfo("Asia/Seoul")
+TIMEZONE = local_timezone()
 
 
 AGENT_KEYWORDS = {
@@ -137,9 +137,15 @@ def detect_agents(text: str) -> list[str]:
     linked = []
     lowered = text.lower()
     for agent, keywords in AGENT_KEYWORDS.items():
-        if any(keyword.lower() in lowered for keyword in keywords):
+        if any(keyword_matches(text, lowered, keyword) for keyword in keywords):
             linked.append(agent)
     return linked or ["nomad-coordinator"]
+
+
+def keyword_matches(text: str, lowered: str, keyword: str) -> bool:
+    if keyword.isascii() and keyword.replace("_", "").isalnum():
+        return re.search(rf"(?<![A-Za-z0-9_]){re.escape(keyword.lower())}(?![A-Za-z0-9_])", lowered) is not None
+    return keyword.lower() in lowered if keyword.isascii() else keyword in text
 
 
 def extract_amount(text: str) -> dict | None:
@@ -229,7 +235,9 @@ def load_recent_captures(captures_dir: Path, limit: int = 20) -> list[dict]:
             for line in file:
                 line = line.strip()
                 if line:
-                    records.append(json.loads(line))
+                    record = json.loads(line)
+                    if record.get("status") != "ignored":
+                        records.append(record)
         if len(records) >= limit:
             break
     return sorted(records[-limit:], key=lambda item: item["created_at"])

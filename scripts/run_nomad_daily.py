@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from datetime import datetime
-from zoneinfo import ZoneInfo
+from time_utils import local_timezone
 
 from process_inbox import process_inbox
 from quick_capture import PROJECT_ROOT
@@ -17,19 +17,21 @@ from read_notes_context import build_context as build_notes_context
 from read_notes_context import log_action as log_notes_action
 from read_notes_context import write_json as write_notes_json
 from refresh_outputs import refresh_outputs
+from package_stay_data import package_current_stay
 
 
-TIMEZONE = ZoneInfo("Asia/Seoul")
+TIMEZONE = local_timezone()
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run Nomad Life daily local pipeline.")
-    parser.add_argument("--date", help="Date to generate in YYYY-MM-DD. Defaults to today in Asia/Seoul.")
+    parser.add_argument("--date", help="Date to generate in YYYY-MM-DD. Defaults to today in configured local timezone.")
     parser.add_argument("--skip-inbox", action="store_true", help="Do not process inbox files.")
     parser.add_argument("--include-local-apps", action="store_true", help="Read approved local app context snapshots.")
     parser.add_argument("--skip-calendar", action="store_true", help="Skip Apple Calendar context when local apps are included.")
     parser.add_argument("--skip-notes", action="store_true", help="Skip Apple Notes context when local apps are included.")
     parser.add_argument("--notes-folder", default="Nomad Life", help="Exact Apple Notes folder to read.")
+    parser.add_argument("--package-stay", action="store_true", help="Create a current stay package and local backup after refresh.")
     return parser.parse_args()
 
 
@@ -40,6 +42,7 @@ def run_daily(
     skip_calendar: bool = False,
     skip_notes: bool = False,
     notes_folder: str = "Nomad Life",
+    package_stay: bool = False,
 ) -> dict:
     now = datetime.now(TIMEZONE)
     target_date = date or now.date().isoformat()
@@ -71,6 +74,7 @@ def run_daily(
             }
 
     refresh = refresh_outputs(target_date, now=now)
+    stay_package = package_current_stay() if package_stay else None
     return {
         "schema_version": "0.1.0",
         "generated_at": now.isoformat(),
@@ -81,6 +85,7 @@ def run_daily(
         "dashboard": refresh["dashboard"],
         "expenses": refresh["expenses"],
         "notifications": refresh["notifications"],
+        "stay_package": stay_package,
         "next_steps": [
             "Review dashboard/today.json",
             "Review dashboard/notifications.json",
@@ -101,6 +106,7 @@ def main() -> None:
                 skip_calendar=args.skip_calendar,
                 skip_notes=args.skip_notes,
                 notes_folder=args.notes_folder,
+                package_stay=args.package_stay,
             ),
             ensure_ascii=False,
             indent=2,

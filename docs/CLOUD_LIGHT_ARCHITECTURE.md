@@ -69,15 +69,18 @@ Vercel must not run Hermes or process private Mac context.
 
 - Authentication and device access.
 - Queue for mobile and web inputs.
+- Immediate canonical storage for direct input ledger records once the input-ledger schema is promoted beyond the current queue-first MVP.
 - Latest dashboard snapshots.
 - Sync logs and failure visibility.
 
-Supabase should initially store only normalized queue payloads and dashboard summaries. It should not store raw private app exports, credentials, full Notes, full Calendar, finance secrets, or HealthKit raw exports.
+Supabase should store direct Nomad Life inputs that the user intentionally submits, plus dashboard summaries. It should not store raw private app exports, credentials, full Notes, full Calendar, finance secrets, or HealthKit raw exports.
+
+Input reflection and analysis are separate. Direct inputs should appear in Input History as `입력됨` even when the Mac is offline. Mac Hermes may later change analysis status to `분석됨` after it refreshes dashboard/report outputs.
 
 ### Mac Hermes Worker
 
-- Pulls pending Supabase queue records.
-- Converts them into local JSON/JSONL contracts.
+- Pulls pending Supabase queue records in the current MVP, and later reads the Supabase input ledger.
+- Mirrors direct inputs into local JSON/JSONL contracts when needed for local-first analysis.
 - Runs deterministic refresh scripts and Hermes-based interpretation.
 - Publishes dashboard snapshots back to Supabase.
 - Logs every pull/process/publish action.
@@ -123,12 +126,14 @@ Used for development, debugging, and private context verification.
 ### Cloud Mode
 
 ```txt
-Dashboard reads Supabase dashboard_snapshots
-Quick Panels insert queue rows into Supabase
+User logs in once through Supabase Auth
+Dashboard reads user-owned Supabase dashboard_snapshots
+Quick Panels insert user-owned queue rows into Supabase
 Mac Hermes Worker processes Supabase queue
 ```
 
 Used for iPhone/iPad/Mac access outside the local Wi-Fi.
+Supabase Auth sessions are persisted by the browser/PWA, so a trusted device/app should stay logged in until the user explicitly logs out or the session is revoked. iOS may still keep separate sessions per Safari/PWA container.
 
 ## First Implementation Slice
 
@@ -142,12 +147,13 @@ Current implementation foundation:
 
 - `api/config.js` exposes browser-safe mode and Supabase anon config.
 - Local `scripts/serve_cockpit.py` also exposes `/api/config`.
+- `web/nomad-auth.js` manages Supabase Auth for hosted Dashboard and Quick Panels with persistent browser sessions.
 - `web/app.js` can read local dashboard files in local mode or latest Supabase `dashboard_snapshots` in cloud mode.
-- `web/app.js` can send Quick Capture and dashboard Workout Detail entries to Supabase queues in cloud mode.
-- `web/workout-quick.js` can run in local mode or Supabase queue mode.
+- `web/app.js` can send Quick Capture and dashboard Workout Detail entries to Supabase queues in cloud mode after login.
+- `web/workout-quick.js` can run in local mode or authenticated Supabase queue mode.
 - `web/data/exercise-library.json` is a public dropdown snapshot generated from the local exercise library.
-- `scripts/supabase_worker.py` processes pending Supabase queue rows on the Mac and publishes dashboard snapshots, including `workout-history`.
-- `scripts/supabase_worker.py` writes operational audit rows to `sync_logs` for queue pulls, queue item processing, failures, and snapshot publishing.
+- `scripts/supabase_worker.py` processes pending Supabase queue rows on the Mac and publishes dashboard snapshots, including `workout-history`, with `NOMAD_SUPABASE_OWNER_USER_ID` as the snapshot owner.
+- `scripts/supabase_worker.py` writes operational audit rows to `sync_logs` for queue pulls, queue item processing, failures, and snapshot publishing, with the same owner user id when configured.
 - `scripts/supabase_worker.py` publishes `sync-status` for the Dashboard Sync Status panel.
 
 ## Guardrails
@@ -158,3 +164,5 @@ Current implementation foundation:
 - Every cloud queue item needs a status lifecycle.
 - Failed queue items must remain inspectable.
 - Dashboard snapshots are derived display artifacts, not raw memory.
+- Hosted browser clients must use the anon key plus a Supabase Auth user session, never a service-role key.
+- Browser RLS policies must require `user_id = auth.uid()` for queues, snapshots, and sync log reads.

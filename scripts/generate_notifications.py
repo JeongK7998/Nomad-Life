@@ -7,18 +7,18 @@ import argparse
 import json
 from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
+from time_utils import local_timezone
 
 from capture_store import read_captures
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-TIMEZONE = ZoneInfo("Asia/Seoul")
+TIMEZONE = local_timezone()
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate notification candidates.")
-    parser.add_argument("--date", help="Date in YYYY-MM-DD. Defaults to today in Asia/Seoul.")
+    parser.add_argument("--date", help="Date in YYYY-MM-DD. Defaults to today in configured local timezone.")
     return parser.parse_args()
 
 

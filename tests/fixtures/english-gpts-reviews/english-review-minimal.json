@@ -1,0 +1,23 @@
+{
+  "schema_version": "0.1.0",
+  "source": "gpts_english_review",
+  "session_id": "gpts_english_fixture_minimal",
+  "date": "2026-05-09",
+  "duration_minutes": 10,
+  "focus_area": "review",
+  "level": "unknown",
+  "transcript_summary": "짧은 복습 세션.",
+  "learned_items": [],
+  "corrections": [],
+  "weak_points": [],
+  "habit_patterns": [],
+  "next_actions": [
+    {
+      "action": "오늘 배운 표현 1개를 소리내어 3번 말하기",
+      "duration_minutes": 3,
+      "priority": "medium"
+    }
+  ],
+  "review_cards": [],
+  "tags": ["minimal"]
+}

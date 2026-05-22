@@ -71,7 +71,13 @@ create policy "anon_insert_capture_queue"
   to anon
   with check (
     status = 'pending'
-    and source in ('dashboard', 'capture_quick', 'workout_quick')
+    and source in (
+      'dashboard',
+      'capture_quick',
+      'workout_quick',
+      'exercise_library_manager',
+      'workout_quick_library_manager'
+    )
     and processed_at is null
     and local_capture_id is null
     and error is null

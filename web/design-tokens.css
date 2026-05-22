@@ -58,6 +58,9 @@
   --primary-normal: #0066ff;
   --primary-strong: #005eeb;
   --primary-heavy: #0054d1;
+  --accent-area: #99e7ff;
+  --accent-area-strong: #22b8e6;
+  --accent-area-tint: rgba(153, 231, 255, 0.24);
 
   --label-normal: #171719;
   --label-strong: #000000;
@@ -123,6 +126,9 @@
   --primary-normal: #3385ff;
   --primary-strong: #4f95ff;
   --primary-heavy: #69a5ff;
+  --accent-area: #99e7ff;
+  --accent-area-strong: #66d8ff;
+  --accent-area-tint: rgba(153, 231, 255, 0.18);
 
   --label-normal: #ffffff;
   --label-strong: #ffffff;

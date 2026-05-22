@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.1.0",
+  "source": "gpts_english_review",
+  "session_id": "gpts_english_fixture_good",
+  "date": "2026-05-09",
+  "started_at": "2026-05-09T08:30:00+09:00",
+  "ended_at": "2026-05-09T08:55:00+09:00",
+  "duration_minutes": 25,
+  "app_name": "Fixture English GPTs",
+  "conversation_title": "Cafe small talk",
+  "input_modes": ["voice"],
+  "focus_area": "small_talk",
+  "level": "beginner",
+  "user_goal": "카페에서 주문 후 짧은 대화 이어가기",
+  "transcript_summary": "카페에서 주문하고 직원과 짧은 대화를 이어가는 상황을 연습했다.",
+  "markdown_file": "english-review-good.md",
+  "context_tags": ["cafe", "daily_life", "small_talk"],
+  "skill_tags": ["fluency", "naturalness"],
+  "habit_tags": ["answering_too_short", "korean_to_english_translation"],
+  "review_tags": ["needs_repeat", "next_mission"],
+  "metrics": {
+    "turn_count": 14,
+    "user_message_count": 7,
+    "assistant_message_count": 7,
+    "estimated_speaking_minutes": 9
+  },
+  "learned_items": [
+    {
+      "type": "expression",
+      "item": "Could I get that iced?",
+      "meaning_ko": "그거 아이스로 받을 수 있을까요?",
+      "example": "Could I get that iced, please?",
+      "context": "카페 주문",
+      "confidence": 0.86
+    }
+  ],
+  "corrections": [
+    {
+      "user_said": "I want ice coffee.",
+      "better": "I'd like an iced coffee.",
+      "reason_ko": "주문 상황에서는 I'd like가 더 자연스럽다.",
+      "category": "naturalness"
+    }
+  ],
+  "weak_points": [
+    {
+      "area": "naturalness",
+      "evidence": "want를 반복적으로 사용함",
+      "severity": "medium"
+    }
+  ],
+  "habit_patterns": [
+    {
+      "habit": "answering_too_short",
+      "evidence": "질문에 짧은 답만 하고 되묻지 않음",
+      "impact": "small talk가 빨리 끊김",
+      "suggestion": "답변 뒤에 이유 1개 또는 질문 1개를 붙이기",
+      "severity": "medium"
+    }
+  ],
+  "strengths": ["주문 표현은 빠르게 말했다."],
+  "next_actions": [
+    {
+      "action": "I'd like / Could I get 패턴 5문장 말하기",
+      "duration_minutes": 5,
+      "priority": "high"
+    }
+  ],
+  "review_cards": [
+    {
+      "front": "그거 아이스로 받을 수 있을까요?",
+      "back": "Could I get that iced?",
+      "tags": ["cafe", "ordering"]
+    }
+  ],
+  "tags": ["cafe", "small_talk"]
+}

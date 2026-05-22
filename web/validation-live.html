@@ -1,0 +1,1515 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nomad Live Validation</title>
+    <script>
+      if (window.location.protocol === "file:") {
+        window.location.replace("http://127.0.0.1:4174/web/validation-live.html");
+      }
+    </script>
+    <style>
+      :root {
+        --bg: #f5f7fa;
+        --panel: #fff;
+        --line: #dce2eb;
+        --text: #172033;
+        --muted: #667085;
+        --blue: #06f;
+        --red: #d92d20;
+        --green: #07864f;
+        --amber: #b7791f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif;
+      }
+
+      .shell {
+        height: 100dvh;
+        min-height: 0;
+        display: grid;
+        grid-template-rows: 34px minmax(0, 1fr);
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 0;
+        padding: 3px 6px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel);
+        flex-wrap: nowrap;
+        overflow: hidden;
+      }
+
+      .title {
+        display: none;
+        margin-right: auto;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 18px;
+        line-height: 1.35;
+      }
+
+      h2 {
+        font-size: 15px;
+      }
+
+      p,
+      li,
+      button,
+      select {
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .muted,
+      small {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      button,
+      select {
+        min-height: 26px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--text);
+        font: inherit;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      button {
+        padding: 0 8px;
+        cursor: pointer;
+      }
+
+      button.primary {
+        border-color: var(--blue);
+        background: var(--blue);
+        color: #fff;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 22px;
+        padding: 0 7px;
+        border-radius: 999px;
+        background: #eef3f8;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .badge.running {
+        background: #e8f1ff;
+        color: var(--blue);
+      }
+
+      .badge.pass {
+        background: #e8f7ef;
+        color: var(--green);
+      }
+
+      .badge.issue {
+        background: #fff1f0;
+        color: var(--red);
+      }
+
+      main {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+        gap: 6px;
+        padding: 6px;
+      }
+
+      body.side-collapsed main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .stage-panel,
+      .side-panel {
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      .stage-panel {
+        display: grid;
+        grid-template-rows: minmax(0, 1fr);
+        overflow: hidden;
+      }
+
+      .stage-head,
+      .side-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .stage-head {
+        display: none;
+      }
+
+      .stage {
+        position: relative;
+        min-height: 0;
+        overflow: auto;
+        padding: 4px;
+        background: #eef2f7;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      .device {
+        position: relative;
+        width: var(--device-width, 390px);
+        height: var(--device-height, 844px);
+        margin: 0;
+        border: 1px solid #c8d0dc;
+        border-radius: 10px;
+        background: #fff;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(23, 32, 51, 0.15);
+        transform: scale(var(--device-scale, 1));
+        transform-origin: 0 0;
+      }
+
+      .device-viewport {
+        position: relative;
+        flex: 0 0 auto;
+        width: var(--device-scaled-width, 390px);
+        height: var(--device-scaled-height, 844px);
+      }
+
+      iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #fff;
+      }
+
+      .cursor {
+        position: absolute;
+        z-index: 10;
+        width: 18px;
+        height: 18px;
+        border: 3px solid var(--blue);
+        border-radius: 999px;
+        background: rgba(0, 102, 255, 0.18);
+        transform: translate(-50%, -50%);
+        transition: left 0.35s ease, top 0.35s ease, transform 0.14s ease;
+        pointer-events: none;
+        box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.14);
+      }
+
+      .cursor.clicking {
+        transform: translate(-50%, -50%) scale(0.76);
+        background: rgba(0, 102, 255, 0.32);
+      }
+
+      .marker {
+        position: absolute;
+        z-index: 9;
+        border: 3px solid var(--red);
+        border-radius: 6px;
+        background: rgba(217, 45, 32, 0.08);
+        pointer-events: none;
+        transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+      }
+
+      .marker.reviewing {
+        box-shadow: 0 0 0 8px rgba(0, 102, 255, 0.18), 0 0 0 2px var(--blue);
+        transform: scale(1.02);
+      }
+
+      .marker-note {
+        position: absolute;
+        left: 0;
+        bottom: calc(100% + 6px);
+        min-width: max-content;
+        max-width: 240px;
+        padding: 6px 8px;
+        border: 1px solid rgba(217, 45, 32, 0.42);
+        border-radius: 6px;
+        background: #d92d20;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.35;
+        box-shadow: 0 8px 18px rgba(217, 45, 32, 0.24);
+      }
+
+      .side-panel {
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      body.side-collapsed .side-panel {
+        display: none;
+      }
+
+      .side-body {
+        min-height: 0;
+        overflow: auto;
+        padding: 8px;
+        display: grid;
+        align-content: start;
+        gap: 8px;
+      }
+
+      .queue,
+      .log,
+      .findings,
+      .detected-zoom {
+        display: grid;
+        gap: 8px;
+      }
+
+      .queue-item,
+      .log-item,
+      .finding {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 7px 8px;
+        background: #fbfcfe;
+      }
+
+      .queue-item.active {
+        border-color: var(--blue);
+        background: #f0f6ff;
+      }
+
+      .queue-item.done {
+        border-color: rgba(7, 134, 79, 0.35);
+      }
+
+      .finding {
+        border-color: rgba(217, 45, 32, 0.35);
+        background: #fff8f7;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .log-item strong,
+      .finding strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 12px;
+      }
+
+      .finding.active {
+        outline: 2px solid rgba(0, 102, 255, 0.55);
+        background: #fff4f2;
+      }
+
+      .zoom-card {
+        border: 1px solid rgba(0, 102, 255, 0.24);
+        border-radius: 8px;
+        background: #f7faff;
+        overflow: hidden;
+      }
+
+      .zoom-meta {
+        display: grid;
+        gap: 3px;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(0, 102, 255, 0.16);
+      }
+
+      .zoom-stage {
+        position: relative;
+        min-height: 190px;
+        max-height: 260px;
+        overflow: auto;
+        padding: 18px;
+        background:
+          linear-gradient(90deg, rgba(23, 32, 51, 0.04) 1px, transparent 1px),
+          linear-gradient(rgba(23, 32, 51, 0.04) 1px, transparent 1px),
+          #fff;
+        background-size: 16px 16px;
+      }
+
+      .zoom-target-wrap {
+        display: inline-block;
+        min-width: min(100%, 240px);
+        transform: scale(1.8);
+        transform-origin: top left;
+        outline: 3px solid rgba(217, 45, 32, 0.72);
+        outline-offset: 4px;
+        border-radius: 6px;
+        background: #fff;
+        box-shadow: 0 12px 28px rgba(23, 32, 51, 0.18);
+      }
+
+      .zoom-reason {
+        margin: 0 0 14px;
+        padding: 9px 10px;
+        border-left: 4px solid var(--red);
+        border-radius: 6px;
+        background: #fff8f7;
+        color: #3b1d1a;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.45;
+      }
+
+      .zoom-empty {
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        background: #fbfcfe;
+      }
+
+      @media (max-width: 980px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+
+        .side-panel {
+          max-height: 360px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="toolbar">
+        <div class="title">
+          <h1>Live Validation Preview</h1>
+          <p class="muted">실제 검증 과정을 눈으로 보는 dry-run · 저장/삭제 write 동작은 실행하지 않음</p>
+        </div>
+        <select id="device-select" aria-label="Device">
+          <option value="390,844">Mobile 390x844</option>
+          <option value="430,932">Large Mobile 430x932</option>
+          <option value="768,1024">Tablet 768x1024</option>
+          <option value="1440,900">Desktop 1440x900</option>
+        </select>
+        <button id="start-button" class="primary" type="button">Start</button>
+        <button id="reset-button" type="button">Reset</button>
+        <button id="panel-toggle" type="button">Panel</button>
+        <span id="run-status" class="badge">idle</span>
+        <span id="compact-step" class="badge">Ready</span>
+      </header>
+
+      <main>
+        <section class="stage-panel">
+          <div class="stage-head">
+            <div>
+              <h2 id="current-surface">Ready</h2>
+              <p id="current-step" class="muted">검증을 시작하면 커서가 직접 이동하며 화면과 모달을 확인합니다.</p>
+            </div>
+            <span class="badge">read-only visual run</span>
+          </div>
+          <div id="stage" class="stage">
+            <div id="device-viewport" class="device-viewport">
+              <div id="device" class="device">
+                <iframe id="app-frame" src="/web/#main" title="Nomad app under live validation"></iframe>
+                <div id="cursor" class="cursor" hidden></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="side-panel">
+          <div class="side-head">
+            <h2>Validation Queue</h2>
+            <span id="finding-count" class="badge">0 findings</span>
+          </div>
+          <div class="side-body">
+            <section>
+              <h3>Surfaces</h3>
+              <div id="queue" class="queue"></div>
+            </section>
+            <section>
+              <h3>Live Log</h3>
+              <div id="log" class="log"></div>
+            </section>
+            <section>
+              <h3>Detected Area Zoom</h3>
+              <div id="detected-zoom" class="detected-zoom">
+                <div class="zoom-empty">
+                  <p class="muted">검출 항목이 생기면 해당 영역이 자동으로 확대됩니다.</p>
+                </div>
+              </div>
+            </section>
+            <section>
+              <h3>Findings</h3>
+              <div id="findings" class="findings">
+                <p class="muted">아직 검출된 항목이 없습니다.</p>
+              </div>
+            </section>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <script>
+      const surfaces = [
+        { id: "main", label: "Main Agent", hash: "#main" },
+        { id: "quick", label: "Nomad Quick", hash: "#main", action: "quick" },
+        { id: "capture", label: "Input History", hash: "#capture", action: "capture-detail" },
+        { id: "activity", label: "Activity", hash: "#activity" },
+        { id: "ai-work", label: "AI Work", hash: "#ai-work" },
+        { id: "health", label: "Health", hash: "#health" },
+        { id: "english", label: "English", hash: "#english" },
+        { id: "finance", label: "Finance", hash: "#finance" },
+        { id: "context", label: "Context Agents", hash: "#context" },
+        { id: "council", label: "Agent Council", hash: "#council" },
+        { id: "reports", label: "Reports", hash: "#reports" },
+        { id: "settings", label: "Settings", hash: "#settings" },
+      ];
+
+      const iframe = document.querySelector("#app-frame");
+      const cursor = document.querySelector("#cursor");
+      const device = document.querySelector("#device");
+      const deviceViewport = document.querySelector("#device-viewport");
+      const queue = document.querySelector("#queue");
+      const log = document.querySelector("#log");
+      const findings = document.querySelector("#findings");
+      const detectedZoom = document.querySelector("#detected-zoom");
+      const findingCount = document.querySelector("#finding-count");
+      const status = document.querySelector("#run-status");
+      const currentSurface = document.querySelector("#current-surface");
+      const currentStep = document.querySelector("#current-step");
+      const compactStep = document.querySelector("#compact-step");
+      const panelToggle = document.querySelector("#panel-toggle");
+      let runFindings = [];
+      let activeFindingId = null;
+      let seenFindingKeys = new Set();
+      let running = false;
+
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      function frameWindow() {
+        return iframe.contentWindow;
+      }
+
+      function frameDocument() {
+        return iframe.contentDocument;
+      }
+
+      function setStep(text) {
+        currentStep.textContent = text;
+        compactStep.textContent = text.length > 44 ? `${text.slice(0, 43)}...` : text;
+      }
+
+      function fitDeviceToStage() {
+        const width = parseFloat(device.style.getPropertyValue("--device-width")) || 390;
+        const height = parseFloat(device.style.getPropertyValue("--device-height")) || 844;
+        const availableWidth = Math.max(120, stage.clientWidth - 8);
+        const availableHeight = Math.max(120, stage.clientHeight - 8);
+        const detailBoost = 1.6;
+        const scale = Math.min(1, availableWidth / width, (availableHeight / height) * detailBoost);
+        const nextScale = Math.max(0.1, scale);
+        device.style.setProperty("--device-scale", String(nextScale));
+        deviceViewport.style.setProperty("--device-scaled-width", `${width * nextScale}px`);
+        deviceViewport.style.setProperty("--device-scaled-height", `${height * nextScale}px`);
+        stage.scrollTop = 0;
+        stage.scrollLeft = 0;
+        requestAnimationFrame(() => {
+          stage.scrollTop = 0;
+          stage.scrollLeft = 0;
+        });
+      }
+
+      function setPanelCollapsed(collapsed) {
+        document.body.classList.toggle("side-collapsed", collapsed);
+        panelToggle.textContent = collapsed ? "Panel" : "Hide";
+        requestAnimationFrame(fitDeviceToStage);
+      }
+
+      function renderQueue(activeId = null, done = new Set()) {
+        queue.replaceChildren(...surfaces.map((surface) => {
+          const item = document.createElement("div");
+          item.className = `queue-item${surface.id === activeId ? " active" : ""}${done.has(surface.id) ? " done" : ""}`;
+          item.innerHTML = `<strong>${surface.label}</strong><p class="muted">${surface.hash}${surface.action ? ` · ${surface.action}` : ""}</p>`;
+          return item;
+        }));
+      }
+
+      function addLog(title, detail = "") {
+        const item = document.createElement("div");
+        item.className = "log-item";
+        item.innerHTML = `<strong>${title}</strong><p>${detail}</p>`;
+        log.prepend(item);
+      }
+
+      function explainFinding(finding) {
+        if (finding.reason) return finding.reason;
+        if (finding.title.includes("Touch target")) {
+          return "손가락으로 누르는 컨트롤이 44px보다 낮아 실제 모바일 조작에서 오탭 가능성이 있습니다.";
+        }
+        if (finding.title.includes("Narrow form field")) {
+          return "입력칸 폭이 좁아 한국어 라벨이나 날짜 값이 잘리거나 읽기 어려울 수 있습니다.";
+        }
+        if (finding.title.includes("Popup anchor")) {
+          return "팝업을 여는 기준점 주변 여유 공간이 부족해 날짜/선택 팝업 위치가 어색할 수 있습니다.";
+        }
+        if (finding.title.includes("Overlay hover color")) {
+          return "드로워의 딤 영역은 배경을 닫는 안전 영역이므로, 마우스가 올라갔을 때 CTA처럼 파란색으로 변하면 사용자가 실제 버튼으로 오해할 수 있습니다.";
+        }
+        if (finding.title.includes("Content too close")) {
+          return "주요 콘텐츠가 화면 가장자리에 너무 붙어 있어 모바일에서 답답해 보이거나 터치/읽기 여유가 부족해 보일 수 있습니다.";
+        }
+        if (finding.title.includes("Large unused")) {
+          return "콘텐츠 그룹이 끝난 뒤 의미 없는 세로 여백이 크게 남아 정보 밀도가 낮아집니다. 전체 패널이 아니라 표시된 빈 구간 자체가 검토 대상입니다.";
+        }
+        if (finding.title.includes("Visual grouping")) {
+          return "같은 그룹 안의 간격 편차가 커서 정보 묶음의 위계가 불안정하게 보일 수 있습니다.";
+        }
+        if (finding.title.includes("Content appears off-center")) {
+          return "주요 블록의 중심이 화면 중심에서 많이 벗어나 있어 한쪽으로 쏠린 레이아웃처럼 보일 수 있습니다.";
+        }
+        if (finding.title.includes("Content clipped")) {
+          return "텍스트나 내부 콘텐츠가 컨테이너 안에서 잘릴 가능성이 있어 실제 사용자가 정보를 끝까지 읽지 못할 수 있습니다.";
+        }
+        if (finding.title.includes("Wrapped label")) {
+          return "짧아야 하는 버튼/칩 라벨이 여러 줄로 떨어지면서 컨트롤 높이와 주변 정렬 리듬을 흔들 수 있습니다.";
+        }
+        if (finding.title.includes("Oversized action")) {
+          return "실행 버튼이 정보량 대비 과도하게 커서 같은 화면에서 볼 수 있는 콘텐츠를 줄이고, 조작 우선순위가 과장될 수 있습니다.";
+        }
+        if (finding.title.includes("Low content density")) {
+          return "큰 패널이 차지하는 면적에 비해 실제 텍스트와 데이터가 적어 화면 밀도가 낮고 스크롤 비용이 커질 수 있습니다.";
+        }
+        if (finding.title.includes("Uneven horizontal margin")) {
+          return "같은 컨테이너 안에서 좌우 여백 리듬이 크게 달라져 정렬 기준이 흔들려 보일 수 있습니다.";
+        }
+        if (finding.title.includes("Horizontal overflow")) {
+          return "화면보다 콘텐츠가 넓어 모바일에서 좌우 밀림이나 잘림이 발생할 수 있습니다.";
+        }
+        return "사람이 실제로 사용할 때 확인이 필요한 후보 컴포넌트입니다.";
+      }
+
+      function addFinding(finding, options = {}) {
+        const rect = finding.rect || { left: 0, top: 0, width: 0, height: 0 };
+        const findingKey = finding.globalKey || [
+          finding.surface,
+          finding.title,
+          finding.category || "",
+          finding.family || finding.evidence,
+          Math.round(rect.width / 12),
+          Math.round(rect.height / 12),
+        ].join("|");
+        if (seenFindingKeys.has(findingKey)) return false;
+        seenFindingKeys.add(findingKey);
+        finding.id = finding.id || `finding-${Date.now()}-${runFindings.length}`;
+        finding.reason = explainFinding(finding);
+        finding.zoom = finding.zoom || buildZoomSnapshot(finding);
+        runFindings.push(finding);
+        findings.querySelector(".muted")?.remove();
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "finding";
+        item.dataset.findingId = finding.id;
+        item.innerHTML = `<strong>${finding.surface} · ${finding.severity}${finding.category ? ` · ${finding.category}` : ""}</strong><p>${finding.title}</p><small>${finding.evidence}</small>`;
+        item.addEventListener("click", () => showFindingZoom(finding.id));
+        findings.prepend(item);
+        findingCount.textContent = `${runFindings.length} findings`;
+        findingCount.className = "badge issue";
+        if (options.focus !== false) showFindingZoom(finding.id);
+        return true;
+      }
+
+      function clearMarkers() {
+        document.querySelectorAll(".marker").forEach((item) => item.remove());
+      }
+
+      function markRect(finding) {
+        const rect = finding.rect;
+        const marker = document.createElement("div");
+        marker.className = "marker";
+        marker.dataset.findingId = finding.id || finding.markerId || "";
+        marker.style.left = `${rect.left}px`;
+        marker.style.top = `${rect.top}px`;
+        marker.style.width = `${rect.width}px`;
+        marker.style.height = `${rect.height}px`;
+        const note = document.createElement("div");
+        note.className = "marker-note";
+        note.textContent = finding.shortReason || finding.title;
+        marker.append(note);
+        device.append(marker);
+        return marker;
+      }
+
+      function copyComputedStyles(source, target) {
+        const computed = frameWindow().getComputedStyle(source);
+        const allowed = [
+          "align-items", "background", "background-color", "border", "border-radius", "box-shadow",
+          "color", "display", "font", "font-family", "font-size", "font-weight", "gap", "grid-template-columns",
+          "height", "justify-content", "line-height", "margin", "min-height", "padding", "text-align",
+          "width", "white-space"
+        ];
+        allowed.forEach((name) => {
+          target.style.setProperty(name, computed.getPropertyValue(name));
+        });
+        target.style.maxWidth = "none";
+        target.style.boxSizing = "border-box";
+        [...source.children].forEach((child, index) => {
+          if (target.children[index]) copyComputedStyles(child, target.children[index]);
+        });
+      }
+
+      function getElementLabel(element) {
+        if (!element) return "Unknown element";
+        const id = element.id ? `#${element.id}` : "";
+        const text = element.textContent?.trim()?.replace(/\s+/g, " ").slice(0, 40);
+        return id || text || element.tagName.toLowerCase();
+      }
+
+      function buildZoomSnapshot(finding) {
+        if (finding.zoom?.html) return finding.zoom;
+        const element = finding.element;
+        if (!element) {
+          return {
+            label: finding.evidence,
+            html: "",
+          };
+        }
+        const clone = element.cloneNode(true);
+        copyComputedStyles(element, clone);
+        clone.removeAttribute("id");
+        clone.querySelectorAll("[id]").forEach((item) => item.removeAttribute("id"));
+        return {
+          label: getElementLabel(element),
+          html: clone.outerHTML,
+        };
+      }
+
+      function createRegionZoom(label, detail) {
+        return {
+          label,
+          html: `
+            <div style="width:260px;min-height:92px;padding:12px;border:2px dashed #d92d20;background:#fff8f7;color:#7a271a;font:700 13px/1.45 -apple-system,BlinkMacSystemFont,'Pretendard','Segoe UI',sans-serif;">
+              <strong style="display:block;margin-bottom:6px;">${label}</strong>
+              <span>${detail}</span>
+            </div>
+          `,
+        };
+      }
+
+      function textLineCount(element) {
+        const style = frameWindow().getComputedStyle(element);
+        const lineHeight = parseFloat(style.lineHeight || "0") || parseFloat(style.fontSize || "14") * 1.35;
+        return Math.max(1, Math.round(element.getBoundingClientRect().height / lineHeight));
+      }
+
+      function showFindingZoom(findingId) {
+        const finding = runFindings.find((item) => item.id === findingId);
+        if (!finding) return;
+        activeFindingId = findingId;
+        document.querySelectorAll(".finding").forEach((item) => {
+          item.classList.toggle("active", item.dataset.findingId === findingId);
+        });
+        const rect = finding.rect || { width: 0, height: 0 };
+        detectedZoom.innerHTML = `
+          <div class="zoom-card">
+            <div class="zoom-meta">
+              <strong>${finding.surface} · ${finding.severity}${finding.category ? ` · ${finding.category}` : ""}</strong>
+              <p>${finding.title}</p>
+              <small>${finding.evidence} · source ${Math.round(rect.width)}x${Math.round(rect.height)}px</small>
+            </div>
+            <div class="zoom-stage">
+              <p class="zoom-reason">${finding.reason}</p>
+              <div class="zoom-target-wrap">
+                ${finding.zoom?.html || `<div style="padding:12px">${finding.zoom?.label || finding.evidence}</div>`}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function nearestComponentName(element) {
+        if (!element) return "region";
+        const component = element.closest([
+          ".routine-card",
+          ".exercise-category-card",
+          ".health-activity-draft-row",
+          ".capture-card",
+          ".action-item",
+          ".overview-card",
+          ".main-agent-cockpit",
+          ".section",
+          ".quick-dialog-panel",
+          ".sidebar",
+        ].join(","));
+        if (!component) return element.tagName.toLowerCase();
+        const className = [...component.classList].filter((name) => !["active", "done", "reviewing"].includes(name)).join(".");
+        return className || component.tagName.toLowerCase();
+      }
+
+      function issueRank(issue) {
+        const order = {
+          "Interaction State": 0,
+          "Layout Density": 1,
+          "Spacing Rhythm": 2,
+          "Alignment": 3,
+          "Responsive Text": 4,
+          "Viewport Anchoring": 5,
+          "Touch Target": 6,
+        };
+        return order[issue.category] ?? 8;
+      }
+
+      function representativeIssues(issues) {
+        const groups = new Map();
+        issues.forEach((issue) => {
+          const rect = issue.rect || { width: 0, height: 0 };
+          const family = issue.family || [
+            issue.title,
+            issue.category || "",
+            nearestComponentName(issue.element),
+            Math.round(rect.width / 16),
+            Math.round(rect.height / 8),
+          ].join("|");
+          if (!groups.has(family)) groups.set(family, []);
+          groups.get(family).push(issue);
+        });
+        const reps = [...groups.values()].map((items) => {
+          const [first] = items;
+          if (items.length > 1) {
+            first.evidence = `${first.evidence} · representative of ${items.length} similar candidates`;
+            first.representativeCount = items.length;
+          }
+          return first;
+        });
+        const sorted = reps.sort((a, b) => issueRank(a) - issueRank(b));
+        const selected = [];
+        const perCategory = new Map();
+        sorted.forEach((issue) => {
+          const category = issue.category || "Other";
+          const limit = category === "Touch Target" ? 3 : 5;
+          const count = perCategory.get(category) || 0;
+          if (count >= limit) return;
+          if (selected.length >= 14) return;
+          selected.push(issue);
+          perCategory.set(category, count + 1);
+        });
+        return selected;
+      }
+
+      function focusMarker(findingId) {
+        document.querySelectorAll(".marker").forEach((item) => {
+          item.classList.toggle("reviewing", item.dataset.findingId === findingId);
+        });
+      }
+
+      async function moveCursorToRect(rect, pause = 450) {
+        cursor.hidden = false;
+        cursor.style.left = `${rect.left + rect.width / 2}px`;
+        cursor.style.top = `${rect.top + rect.height / 2}px`;
+        await sleep(pause);
+      }
+
+      async function reviewIssueSequence(surfaceLabel, issues) {
+        const reviewIssues = representativeIssues(issues);
+        if (!reviewIssues.length) return;
+        clearMarkers();
+        addLog("Candidate risk map", `${surfaceLabel}: ${issues.length}개 후보 중 대표 ${reviewIssues.length}개를 표시하고 순차 확대합니다.`);
+        reviewIssues.forEach((issue, index) => {
+          issue.markerId = `candidate-${Date.now()}-${index}`;
+          issue.shortReason = issue.title.replace("Touch target height below 44px", "터치 영역 작음")
+            .replace("Narrow form field may clip localized value", "입력칸 좁음")
+            .replace("Popup anchor needs placement check", "팝업 위치 확인")
+            .replace("Overlay hover color should stay dim", "딤 hover 색상")
+            .replace("Content too close to viewport edge", "마진 부족")
+            .replace("Large unused vertical gap inside panel", "과도한 하단 여백")
+            .replace("Visual grouping gap is inconsistent", "그룹 간격 불안정")
+            .replace("Content appears off-center", "한쪽 쏠림")
+            .replace("Content clipped inside container", "콘텐츠 잘림")
+            .replace("Wrapped label deforms compact control", "줄넘김 변형")
+            .replace("Oversized action control reduces information density", "과도한 버튼 크기")
+            .replace("Low content density inside large panel", "낮은 정보 밀도")
+            .replace("Uneven horizontal margin rhythm", "좌우 마진 불균형")
+            .replace("Horizontal overflow", "좌우 넘침");
+          issue.id = issue.markerId;
+          markRect(issue);
+        });
+        await sleep(650);
+        for (const issue of reviewIssues) {
+          const added = addFinding(issue, { focus: false });
+          if (!added) continue;
+          focusMarker(issue.id);
+          showFindingZoom(issue.id);
+          setStep(`${issue.surface}: ${issue.title} 후보 확대 검토`);
+          await moveCursorToRect(issue.rect, 520);
+          await sleep(920);
+        }
+        focusMarker(null);
+        await sleep(260);
+        clearMarkers();
+      }
+
+      async function gotoSurface(surface) {
+        const nextSrc = `/web/${surface.hash}`;
+        const currentPath = iframe.contentWindow?.location?.pathname;
+        const currentHash = iframe.contentWindow?.location?.hash;
+        if (currentPath === "/web/" && currentHash === surface.hash) {
+          await sleep(150);
+        } else {
+          await new Promise((resolve) => {
+            const timer = setTimeout(resolve, 1600);
+            iframe.addEventListener("load", () => {
+              clearTimeout(timer);
+              resolve();
+            }, { once: true });
+            iframe.src = nextSrc;
+          });
+        }
+        await sleep(450);
+      }
+
+      async function moveTo(selector, options = {}) {
+        const doc = frameDocument();
+        const element = doc.querySelector(selector);
+        if (!element) {
+          addLog("Selector not found", selector);
+          return null;
+        }
+        element.scrollIntoView({ block: "center", inline: "center" });
+        await sleep(240);
+        const rect = element.getBoundingClientRect();
+        cursor.hidden = false;
+        cursor.style.left = `${rect.left + rect.width / 2}px`;
+        cursor.style.top = `${rect.top + rect.height / 2}px`;
+        await sleep(options.pause ?? 520);
+        return element;
+      }
+
+      async function click(selector) {
+        const element = await moveTo(selector);
+        if (!element) return false;
+        cursor.classList.add("clicking");
+        await sleep(140);
+        element.click();
+        cursor.classList.remove("clicking");
+        await sleep(650);
+        return true;
+      }
+
+      async function openControlPreview(selector, surfaceLabel, label) {
+        const element = await moveTo(selector, { pause: 460 });
+        if (!element) return [];
+        setStep(`${surfaceLabel}: ${label} 조작 상태 확인`);
+        cursor.classList.add("clicking");
+        await sleep(120);
+        element.focus();
+        try {
+          if (typeof element.showPicker === "function") element.showPicker();
+        } catch {
+          element.click();
+        }
+        cursor.classList.remove("clicking");
+        await sleep(650);
+
+        const rect = element.getBoundingClientRect();
+        const viewportHeight = frameWindow().innerHeight;
+        const viewportWidth = frameWindow().innerWidth;
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceRight = viewportWidth - rect.right;
+        const issues = [];
+        if (element.matches('input[type="date"], select') && (spaceBelow < 220 || spaceRight < 12 || rect.left < 12)) {
+          issues.push({
+            surface: surfaceLabel,
+            severity: "P3",
+            category: "Viewport Anchoring",
+            title: "Popup anchor needs placement check",
+            evidence: `${label}: below ${Math.round(spaceBelow)}px, right ${Math.round(spaceRight)}px`,
+            reason: "날짜/선택 팝업을 실제로 열어 보는 지점입니다. 기준점 주변 여백이 부족하면 팝업이 화면 밖으로 밀리거나 중요한 버튼을 덮을 수 있습니다.",
+            rect,
+            element,
+          });
+        }
+        element.blur();
+        frameWindow().focus();
+        addLog("Interaction check", `${surfaceLabel}: ${label} focus/click 상태를 확인했습니다.`);
+        return issues;
+      }
+
+      function hasDrawerBackdropHoverGuard() {
+        const doc = frameDocument();
+        const ruleMatches = (rules) => [...rules].some((rule) => {
+          if (rule.selectorText?.includes(".drawer-backdrop:hover")) return true;
+          if (rule.cssRules) return ruleMatches(rule.cssRules);
+          return false;
+        });
+        return [...doc.styleSheets].some((sheet) => {
+          try {
+            return ruleMatches(sheet.cssRules);
+          } catch {
+            return false;
+          }
+        });
+      }
+
+      async function inspectDrawerOverlay(surfaceLabel) {
+        const doc = frameDocument();
+        const openButton = doc.querySelector("#open-menu-button");
+        const backdrop = doc.querySelector("#drawer-backdrop");
+        if (!openButton || !backdrop || frameWindow().innerWidth > 860) return [];
+        setStep(`${surfaceLabel}: 모바일 드로워와 딤 영역 hover 상태 확인`);
+        await click("#open-menu-button");
+        await sleep(320);
+        const rect = backdrop.getBoundingClientRect();
+        await moveCursorToRect({
+          left: Math.max(rect.left + rect.width - 36, rect.left + 12),
+          top: rect.top + rect.height / 2,
+          width: 24,
+          height: 24,
+        }, 520);
+        const hasHoverGuard = hasDrawerBackdropHoverGuard();
+        const computed = frameWindow().getComputedStyle(backdrop);
+        const issues = [];
+        if (!hasHoverGuard) {
+          issues.push({
+            surface: surfaceLabel,
+            severity: "P2",
+            category: "Interaction State",
+            title: "Overlay hover color should stay dim",
+            evidence: `drawer backdrop is a button and can inherit global button:hover; current ${computed.backgroundColor}`,
+            rect,
+            element: backdrop,
+          });
+        }
+        addLog("Drawer overlay check", `${surfaceLabel}: 딤 영역 hover guard ${hasHoverGuard ? "확인됨" : "필요"}.`);
+        await click("#close-menu-button");
+        return issues;
+      }
+
+      function inspectVisibleControls(surfaceLabel) {
+        const doc = frameDocument();
+        const issues = [];
+        const visible = (el) => {
+          const rect = el.getBoundingClientRect();
+          const style = frameWindow().getComputedStyle(el);
+          return rect.width > 0
+            && rect.height > 0
+            && rect.bottom > 0
+            && rect.top < frameWindow().innerHeight
+            && style.display !== "none"
+            && style.visibility !== "hidden"
+            && style.opacity !== "0";
+        };
+        doc.querySelectorAll("button, input, select, textarea").forEach((el) => {
+          if (!visible(el)) return;
+          if (["radio", "checkbox", "hidden"].includes(el.getAttribute("type") || "")) return;
+          const rect = el.getBoundingClientRect();
+          if (rect.height < 44 && frameWindow().innerWidth <= 430) {
+            const clippedRect = visibleRect(rect);
+            if (!clippedRect) return;
+            issues.push({
+              surface: surfaceLabel,
+              severity: "P2",
+              category: "Touch Target",
+              title: "Touch target height below 44px",
+              evidence: `${el.id || el.textContent.trim() || el.tagName}: ${Math.round(rect.width)}x${Math.round(rect.height)}`,
+              rect: clippedRect,
+              element: el,
+              family: `touch|${nearestComponentName(el)}|${el.tagName}|${Math.round(rect.height)}`,
+            });
+          }
+        });
+        if (doc.documentElement.scrollWidth > frameWindow().innerWidth + 2) {
+          issues.push({
+            surface: surfaceLabel,
+            severity: "P1",
+            category: "Viewport Anchoring",
+            title: "Horizontal overflow",
+            evidence: `scrollWidth ${doc.documentElement.scrollWidth}, viewport ${frameWindow().innerWidth}`,
+            rect: { left: 0, top: 0, width: frameWindow().innerWidth, height: 24 },
+            element: doc.body,
+          });
+        }
+        return issues;
+      }
+
+      function isVisibleElement(el) {
+        const rect = el.getBoundingClientRect();
+        const style = frameWindow().getComputedStyle(el);
+        return rect.width > 0
+          && rect.height > 0
+          && rect.bottom > 0
+          && rect.top < frameWindow().innerHeight
+          && style.display !== "none"
+          && style.visibility !== "hidden"
+          && style.opacity !== "0";
+      }
+
+      function visibleRect(rect) {
+        const win = frameWindow();
+        const left = Math.max(0, rect.left);
+        const top = Math.max(0, rect.top);
+        const right = Math.min(win.innerWidth, rect.right ?? rect.left + rect.width);
+        const bottom = Math.min(win.innerHeight, rect.bottom ?? rect.top + rect.height);
+        if (right - left < 12 || bottom - top < 12) return null;
+        return {
+          left,
+          top,
+          width: right - left,
+          height: bottom - top,
+        };
+      }
+
+      function inspectVisualComposition(surfaceLabel) {
+        const doc = frameDocument();
+        const win = frameWindow();
+        const issues = [];
+        const blockSelector = [
+          ".section",
+          ".overview-card",
+          ".agent-card",
+          ".context-card",
+          ".action-item",
+          ".routine-card",
+          ".capture-card",
+          ".finance-review-panel",
+          ".main-agent-cockpit",
+          ".panel",
+          "dialog[open] > *",
+        ].join(",");
+        doc.querySelectorAll(blockSelector).forEach((el) => {
+          if (!isVisibleElement(el)) return;
+          const rect = el.getBoundingClientRect();
+          const style = win.getComputedStyle(el);
+          const label = getElementLabel(el);
+          const clippedRect = visibleRect(rect);
+          if (!clippedRect) return;
+          if (rect.width > win.innerWidth * 0.72 && (rect.left < 10 || win.innerWidth - rect.right < 10)) {
+            issues.push({
+              surface: surfaceLabel,
+              severity: "P3",
+              category: "Spacing Rhythm",
+              title: "Content too close to viewport edge",
+              evidence: `${label}: left ${Math.round(rect.left)}px, right ${Math.round(win.innerWidth - rect.right)}px`,
+              rect: clippedRect,
+              element: el,
+            });
+          }
+          const centerOffset = Math.abs((rect.left + rect.width / 2) - win.innerWidth / 2);
+          if (rect.width > win.innerWidth * 0.58 && centerOffset > win.innerWidth * 0.18) {
+            issues.push({
+              surface: surfaceLabel,
+              severity: "P3",
+              category: "Alignment",
+              title: "Content appears off-center",
+              evidence: `${label}: center offset ${Math.round(centerOffset)}px`,
+              rect,
+              element: el,
+            });
+          }
+          const children = [...el.children].filter(isVisibleElement);
+          if (children.length >= 2) {
+            const sorted = children
+              .map((child) => child.getBoundingClientRect())
+              .sort((a, b) => a.top - b.top);
+            const gaps = [];
+            for (let index = 1; index < sorted.length; index += 1) {
+              const gap = sorted[index].top - sorted[index - 1].bottom;
+              if (gap > 0) gaps.push(gap);
+            }
+            const largeGap = gaps.find((gap) => gap > 56);
+            const smallGap = gaps.find((gap) => gap < 8);
+            if (largeGap && smallGap) {
+              issues.push({
+                surface: surfaceLabel,
+                severity: "P3",
+                category: "Spacing Rhythm",
+                title: "Visual grouping gap is inconsistent",
+                evidence: `${label}: gaps ${Math.round(Math.min(...gaps))}-${Math.round(Math.max(...gaps))}px`,
+                rect,
+                element: el,
+              });
+            }
+            const lastChildBottom = Math.max(...sorted.map((child) => child.bottom));
+            const innerBottomGap = rect.bottom - lastChildBottom - parseFloat(style.paddingBottom || 0);
+            if (rect.height > 260 && innerBottomGap > 96) {
+              const gapTop = Math.max(lastChildBottom, rect.top);
+              const gapHeight = Math.min(innerBottomGap, rect.bottom - gapTop);
+              const gapRect = {
+                left: rect.left + parseFloat(style.paddingLeft || 0),
+                top: gapTop,
+                width: Math.max(32, rect.width - parseFloat(style.paddingLeft || 0) - parseFloat(style.paddingRight || 0)),
+                height: Math.max(24, gapHeight),
+              };
+              const visibleGapRect = visibleRect(gapRect);
+              if (!visibleGapRect) return;
+              issues.push({
+                surface: surfaceLabel,
+                severity: "P3",
+                category: "Layout Density",
+                title: "Large unused vertical gap inside panel",
+                evidence: `${label}: empty region after last visible child ${Math.round(innerBottomGap)}px`,
+                reason: "콘텐츠 그룹이 끝난 뒤 의미 없는 세로 여백이 크게 남아 정보 밀도가 낮아집니다. 전체 패널이 아니라 표시된 빈 구간 자체가 검토 대상입니다.",
+                rect: visibleGapRect,
+                element: null,
+                zoom: createRegionZoom("과도한 하단 여백", `${label} 내부의 마지막 콘텐츠 아래에 약 ${Math.round(innerBottomGap)}px 비활성 여백이 남아 있습니다.`),
+              });
+            }
+          }
+        });
+        doc.querySelectorAll("h1, h2, h3, p, small, span, strong, button, a").forEach((el) => {
+          if (!isVisibleElement(el)) return;
+          if (el.scrollWidth > el.clientWidth + 6 || el.scrollHeight > el.clientHeight + 6) {
+            const rect = el.getBoundingClientRect();
+            issues.push({
+              surface: surfaceLabel,
+              severity: "P2",
+              category: "Responsive Text",
+              title: "Content clipped inside container",
+              evidence: `${getElementLabel(el)}: scroll ${el.scrollWidth}x${el.scrollHeight}, client ${el.clientWidth}x${el.clientHeight}`,
+              rect,
+              element: el,
+            });
+          }
+        });
+        doc.querySelectorAll("button, a, .badge, .nav-badge, .quick-chip-grid span, .routine-tag").forEach((el) => {
+          if (!isVisibleElement(el)) return;
+          const rect = el.getBoundingClientRect();
+          const clippedRect = visibleRect(rect);
+          if (!clippedRect) return;
+          const text = el.textContent?.trim()?.replace(/\s+/g, " ") || el.getAttribute("aria-label") || el.tagName;
+          const lines = textLineCount(el);
+          if (text.length >= 6 && lines >= 2 && rect.width < 120) {
+            issues.push({
+              surface: surfaceLabel,
+              severity: "P2",
+              category: "Responsive Text",
+              title: "Wrapped label deforms compact control",
+              evidence: `${text.slice(0, 28)}: ${lines} lines in ${Math.round(rect.width)}px control`,
+              rect: clippedRect,
+              element: el,
+              family: `wrapped|${nearestComponentName(el)}|${el.tagName}|${Math.round(rect.width / 24)}`,
+            });
+          }
+        });
+        doc.querySelectorAll("button").forEach((el) => {
+          if (!isVisibleElement(el)) return;
+          const rect = el.getBoundingClientRect();
+          const clippedRect = visibleRect(rect);
+          if (!clippedRect) return;
+          const text = el.textContent?.trim()?.replace(/\s+/g, " ") || el.getAttribute("aria-label") || "button";
+          const areaRatio = (rect.width * rect.height) / (win.innerWidth * win.innerHeight);
+          if ((rect.height > 56 || rect.width > win.innerWidth * 0.52) && text.length <= 18 && areaRatio > 0.026) {
+            issues.push({
+              surface: surfaceLabel,
+              severity: "P3",
+              category: "Layout Density",
+              title: "Oversized action control reduces information density",
+              evidence: `${text}: ${Math.round(rect.width)}x${Math.round(rect.height)}, ${(areaRatio * 100).toFixed(1)}% of viewport`,
+              rect: clippedRect,
+              element: el,
+              family: `oversized-button|${nearestComponentName(el)}|${Math.round(rect.height / 12)}`,
+            });
+          }
+        });
+        doc.querySelectorAll(blockSelector).forEach((el) => {
+          if (!isVisibleElement(el)) return;
+          const rect = el.getBoundingClientRect();
+          const clippedRect = visibleRect(rect);
+          if (!clippedRect || rect.height < 180 || rect.width < win.innerWidth * 0.55) return;
+          const text = el.textContent?.trim()?.replace(/\s+/g, " ") || "";
+          const textDensity = text.length / Math.max(1, rect.width * rect.height);
+          const interactiveCount = el.querySelectorAll("button, input, select, textarea, a").length;
+          if (text.length < 220 && interactiveCount <= 2 && textDensity < 0.0018) {
+            issues.push({
+              surface: surfaceLabel,
+              severity: "P3",
+              category: "Layout Density",
+              title: "Low content density inside large panel",
+              evidence: `${getElementLabel(el)}: ${text.length} chars, ${Math.round(rect.width)}x${Math.round(rect.height)} panel`,
+              rect: clippedRect,
+              element: el,
+              family: `low-density|${nearestComponentName(el)}|${Math.round(rect.height / 80)}`,
+            });
+          }
+        });
+        doc.querySelectorAll(".section, .quick-dialog-panel, .capture-edit-form, .main-agent-cockpit").forEach((container) => {
+          if (!isVisibleElement(container)) return;
+          const childRects = [...container.children]
+            .filter(isVisibleElement)
+            .map((child) => child.getBoundingClientRect())
+            .filter((rect) => rect.width > 80 && rect.height > 20);
+          if (childRects.length < 3) return;
+          const lefts = childRects.map((rect) => Math.round(rect.left));
+          const rights = childRects.map((rect) => Math.round(win.innerWidth - rect.right));
+          const leftRange = Math.max(...lefts) - Math.min(...lefts);
+          const rightRange = Math.max(...rights) - Math.min(...rights);
+          if (leftRange > 28 && rightRange > 28) {
+            const rect = visibleRect(container.getBoundingClientRect());
+            if (!rect) return;
+            issues.push({
+              surface: surfaceLabel,
+              severity: "P3",
+              category: "Spacing Rhythm",
+              title: "Uneven horizontal margin rhythm",
+              evidence: `${getElementLabel(container)}: left variance ${leftRange}px, right variance ${rightRange}px`,
+              rect,
+              element: container,
+              family: `margin-rhythm|${nearestComponentName(container)}`,
+            });
+          }
+        });
+        return issues;
+      }
+
+      function dedupeIssues(issues) {
+        const seen = new Set();
+        return issues.filter((issue) => {
+          const rect = issue.rect || { left: 0, top: 0, width: 0, height: 0 };
+          const key = [
+            issue.surface,
+            issue.title,
+            issue.evidence,
+            Math.round(rect.left / 8),
+            Math.round(rect.top / 8),
+            Math.round(rect.width / 8),
+            Math.round(rect.height / 8),
+          ].join("|");
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      }
+
+      function getScrollContainer() {
+        const win = frameWindow();
+        const doc = frameDocument();
+        const candidates = [
+          doc.querySelector("main"),
+          doc.scrollingElement,
+          doc.documentElement,
+          doc.body,
+        ].filter(Boolean);
+        return candidates.find((el) => el.scrollHeight > el.clientHeight + 24) || doc.scrollingElement || doc.documentElement;
+      }
+
+      function scrollToPosition(container, position) {
+        if (container === frameDocument().scrollingElement || container === frameDocument().documentElement || container === frameDocument().body) {
+          frameWindow().scrollTo({ top: position, behavior: "smooth" });
+        } else {
+          container.scrollTo({ top: position, behavior: "smooth" });
+        }
+      }
+
+      function visibleScrollPosition(container) {
+        if (container === frameDocument().scrollingElement || container === frameDocument().documentElement || container === frameDocument().body) {
+          return frameWindow().scrollY || container.scrollTop || 0;
+        }
+        return container.scrollTop || 0;
+      }
+
+      async function scrollSurfaceScan(surfaceLabel) {
+        const scrollContainer = getScrollContainer();
+        const maxScroll = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
+        const positions = [...new Set([0, Math.round(maxScroll * 0.45), maxScroll].filter((value) => value >= 0))];
+        for (const position of positions) {
+          setStep(`${surfaceLabel}: 스크롤 ${Math.round(position)}px 지점까지 내려가며 화면 밖 컴포넌트 확인`);
+          clearMarkers();
+          scrollToPosition(scrollContainer, position);
+          await sleep(520);
+          const issues = dedupeIssues([
+            ...inspectVisibleControls(surfaceLabel),
+            ...inspectFormGeometry(surfaceLabel),
+            ...inspectVisualComposition(surfaceLabel),
+          ]);
+          addLog("Scroll viewport scan", `${surfaceLabel}: ${Math.round(visibleScrollPosition(scrollContainer))}px 지점에서 ${issues.length}개 후보 확인.`);
+          await reviewIssueSequence(surfaceLabel, issues);
+        }
+        scrollToPosition(scrollContainer, 0);
+        await sleep(260);
+      }
+
+      function inspectFormGeometry(surfaceLabel) {
+        const doc = frameDocument();
+        const issues = [];
+        doc.querySelectorAll("label").forEach((label) => {
+          const control = label.querySelector("input, select, textarea");
+          if (!control) return;
+          if (!isVisibleElement(label) || !isVisibleElement(control)) return;
+          const labelRect = label.getBoundingClientRect();
+          const controlRect = control.getBoundingClientRect();
+          if (controlRect.width <= 0 || controlRect.height <= 0) return;
+          const labelText = label.querySelector("span")?.textContent?.trim() || label.textContent.trim().slice(0, 16);
+          const style = frameWindow().getComputedStyle(control);
+          if (controlRect.width < 136 && ["date", "number"].includes(control.getAttribute("type") || "")) {
+            issues.push({
+              surface: surfaceLabel,
+              severity: "P2",
+              category: "Responsive Text",
+              title: "Narrow form field may clip localized value",
+              evidence: `${labelText}: ${Math.round(controlRect.width)}px wide`,
+              rect: labelRect,
+              element: label,
+            });
+          }
+          if (control.scrollWidth > control.clientWidth + 4 && style.overflowX !== "visible") {
+            issues.push({
+              surface: surfaceLabel,
+              severity: "P2",
+              category: "Responsive Text",
+              title: "Input text may be clipped",
+              evidence: `${labelText}: scrollWidth ${control.scrollWidth}, clientWidth ${control.clientWidth}`,
+              rect: labelRect,
+              element: label,
+            });
+          }
+        });
+        return issues;
+      }
+
+      async function runSurface(surface, done) {
+        currentSurface.textContent = surface.label;
+        setStep("화면 로드 중");
+        renderQueue(surface.id, done);
+        clearMarkers();
+        await gotoSurface(surface);
+        addLog("Loaded surface", surface.label);
+        const drawerIssues = await inspectDrawerOverlay(surface.label);
+        if (drawerIssues.length) {
+          await reviewIssueSequence(surface.label, drawerIssues);
+        }
+        await scrollSurfaceScan(surface.label);
+
+        if (surface.action === "quick") {
+          setStep("Quick 버튼 클릭, 날짜/디테일 조작 플로우 확인");
+          await click("#floating-quick-button");
+          let issues = [
+            ...inspectVisibleControls(surface.label),
+            ...(await openControlPreview("#activity-date", surface.label, "활동 날짜")),
+          ];
+          await click(".quick-optional summary");
+          issues = [
+            ...issues,
+            ...inspectVisibleControls(surface.label),
+            ...inspectFormGeometry(surface.label),
+            ...(await openControlPreview("#activity-place", surface.label, "장소 선택")),
+          ];
+          await reviewIssueSequence(surface.label, issues);
+          await click("#close-quick-button");
+        }
+
+        if (surface.action === "capture-detail") {
+          setStep("Input History detail modal 열기, 날짜/상태 조작 플로우 확인");
+          const opened = await click("[data-history-id]");
+          if (opened) {
+            await sleep(500);
+            const issues = [
+              ...inspectVisibleControls(surface.label),
+              ...inspectFormGeometry(surface.label),
+              ...(await openControlPreview("#capture-edit-date", surface.label, "적용일 날짜 팝업")),
+              ...(await openControlPreview("#capture-edit-status", surface.label, "반영 상태 선택")),
+            ];
+            await reviewIssueSequence(surface.label, issues);
+            await click("[data-capture-detail-close]");
+          } else {
+            addLog("Skipped detail modal", "히스토리 항목이 없어서 detail modal을 열지 못했습니다.");
+          }
+        }
+
+        if (!surface.action) {
+          setStep("대표 화면 스크롤/비주얼 구성 검사 완료");
+        }
+
+        done.add(surface.id);
+        renderQueue(null, done);
+        await sleep(450);
+      }
+
+      async function runValidation() {
+        if (running) return;
+        running = true;
+        status.textContent = "running";
+        status.className = "badge running";
+        runFindings = [];
+        findingCount.textContent = "0 findings";
+        findingCount.className = "badge";
+        findings.replaceChildren();
+        log.replaceChildren();
+        seenFindingKeys = new Set();
+        cursor.hidden = false;
+        const done = new Set();
+        try {
+          for (const surface of surfaces) {
+            await runSurface(surface, done);
+          }
+          currentSurface.textContent = "Completed";
+          setStep("라이브 dry-run이 끝났습니다. 발견 항목은 오른쪽 Findings에 남아 있습니다.");
+          status.textContent = runFindings.length ? "needs review" : "pass";
+          status.className = runFindings.length ? "badge issue" : "badge pass";
+        } finally {
+          running = false;
+        }
+      }
+
+      function resetRun() {
+        clearMarkers();
+        log.replaceChildren();
+        findings.innerHTML = '<p class="muted">아직 검출된 항목이 없습니다.</p>';
+        detectedZoom.innerHTML = '<div class="zoom-empty"><p class="muted">검출 항목이 생기면 해당 영역이 자동으로 확대됩니다.</p></div>';
+        runFindings = [];
+        seenFindingKeys = new Set();
+        activeFindingId = null;
+        findingCount.textContent = "0 findings";
+        findingCount.className = "badge";
+        currentSurface.textContent = "Ready";
+        setStep("검증을 시작하면 커서가 직접 이동하며 화면과 모달을 확인합니다.");
+        status.textContent = "idle";
+        status.className = "badge";
+        iframe.src = "/web/#main";
+        renderQueue();
+      }
+
+      document.querySelector("#start-button").addEventListener("click", runValidation);
+      document.querySelector("#reset-button").addEventListener("click", resetRun);
+      panelToggle.addEventListener("click", () => {
+        setPanelCollapsed(!document.body.classList.contains("side-collapsed"));
+      });
+      document.querySelector("#device-select").addEventListener("change", (event) => {
+        const [width, height] = event.target.value.split(",");
+        device.style.setProperty("--device-width", `${width}px`);
+        device.style.setProperty("--device-height", `${height}px`);
+        fitDeviceToStage();
+      });
+
+      window.addEventListener("resize", fitDeviceToStage);
+      iframe.addEventListener("load", fitDeviceToStage);
+      renderQueue();
+      setPanelCollapsed(true);
+      fitDeviceToStage();
+    </script>
+  </body>
+</html>

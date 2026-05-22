@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from datetime import datetime
-from zoneinfo import ZoneInfo
+from time_utils import local_timezone
 
 from generate_activity_allocation import generate_activity_allocation
 from generate_agent_reports import generate_agent_reports
@@ -15,12 +15,12 @@ from generate_expense_candidates import generate_expense_candidates
 from generate_notifications import generate_notifications
 
 
-TIMEZONE = ZoneInfo("Asia/Seoul")
+TIMEZONE = local_timezone()
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Refresh Nomad Life derived outputs.")
-    parser.add_argument("--date", help="Date to refresh in YYYY-MM-DD. Defaults to today in Asia/Seoul.")
+    parser.add_argument("--date", help="Date to refresh in YYYY-MM-DD. Defaults to today in configured local timezone.")
     return parser.parse_args()
 
 

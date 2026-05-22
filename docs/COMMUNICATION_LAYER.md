@@ -1,23 +1,34 @@
 # Communication Layer
 
-Nomad Life separates data capture, Dashboard viewing, Quick Panel input, conversation, and notification.
+Nomad Life separates structured input, Dashboard viewing, conversation, and notification.
 
 The user should not need to talk to every domain agent directly. The user talks to the Coordinator. The Coordinator reads context, consults domain Skills conceptually, and returns a single coherent answer.
+
+## Primary Interaction Surfaces
+
+```txt
+Nomad Quick PWA
+  -> structured activity and detail input
+
+Nomad Dashboard
+  -> analysis, visualization, review, approval
+
+Telegram + Hermes Coordinator
+  -> data-based conversation, questions, orchestration, suggestions
+```
+
+Nomad Quick PWA is the single structured input entry point. Shortcuts, widgets, or other launchers may open it later, but they should not become separate input systems.
 
 ## Channels
 
 ```txt
-Capture Channel
-  Supabase capture queue / Web Quick Capture / Telegram explicit capture / fallback local inbox
-  -> fast data entry
+Input Channel
+  Nomad Quick PWA / Supabase queue / fallback local inbox
+  -> fast structured input
 
 Dashboard Channel
   Nomad Dashboard on Vercel / Local Dashboard on Mac
   -> dashboard, reports, action center, logs
-
-Quick Panel Channel
-  Workout Quick / Capture Quick / Meal Quick
-  -> fast structured input from Mac, iPad, iPhone
 
 Conversation Channel
   Hermes chat, initially local CLI simulation and later Telegram

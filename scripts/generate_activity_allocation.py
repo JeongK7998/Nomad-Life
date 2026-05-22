@@ -9,13 +9,14 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
+from time_utils import local_timezone
 
 from capture_store import read_captures
+from activity_store import read_activity_sessions
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-TIMEZONE = ZoneInfo("Asia/Seoul")
+TIMEZONE = local_timezone()
 
 AREA_KEYWORDS = {
     "AI Work": ("작업", "코딩", "개발", "ai", "codex", "claude", "프로젝트", "집중"),
@@ -35,6 +36,19 @@ AGENT_AREAS = {
     "nomad-travel-guide": "Travel/Experience",
     "nomad-rest": "Rest",
     "nomad-finance": "Finance",
+}
+
+AREA_LABELS = {
+    "work": "AI Work",
+    "health": "Health",
+    "food": "Food",
+    "english": "English",
+    "creator": "Creator/Social",
+    "travel": "Travel/Experience",
+    "social": "Creator/Social",
+    "rest": "Rest",
+    "admin": "Admin",
+    "unclassified": "Unclassified",
 }
 
 ACTIVITY_AGENT_PRIORITY = (
@@ -61,7 +75,7 @@ MERIDIEM_HINTS = {
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate activity allocation candidates.")
-    parser.add_argument("--date", help="Date to process in YYYY-MM-DD. Defaults to today in Asia/Seoul.")
+    parser.add_argument("--date", help="Date to process in YYYY-MM-DD. Defaults to today in configured local timezone.")
     return parser.parse_args()
 
 
@@ -69,6 +83,17 @@ def capture_dates_for_month(target_date: str) -> list[str]:
     captures_dir = PROJECT_ROOT / "data/captures"
     month_prefix = target_date[:7]
     return sorted(path.stem for path in captures_dir.glob(f"{month_prefix}-*.jsonl") if path.stem <= target_date)
+
+
+def activity_dates_for_month(target_date: str) -> list[str]:
+    month_prefix = target_date[:7]
+    return sorted(
+        {
+            session.get("date")
+            for session in read_activity_sessions()
+            if session.get("date", "").startswith(month_prefix) and session.get("date") <= target_date
+        }
+    )
 
 
 def write_json(path: Path, payload: dict) -> None:
@@ -249,6 +274,34 @@ def session_from_capture(capture: dict) -> dict | None:
     }
 
 
+def session_from_activity(activity: dict) -> dict | None:
+    if activity.get("status") == "ignored":
+        return None
+    duration = activity.get("duration_minutes")
+    if not duration:
+        return None
+    area = activity.get("area_label") or AREA_LABELS.get(activity.get("area"), "Unclassified")
+    return {
+        "id": activity["id"],
+        "date": activity["date"],
+        "area": area,
+        "area_key": activity.get("area"),
+        "label": activity.get("subcategory") or activity.get("detail") or area,
+        "start_time": activity.get("start_time"),
+        "end_time": activity.get("end_time"),
+        "duration_minutes": int(duration),
+        "source": activity["id"],
+        "source_text": activity.get("detail") or "",
+        "subcategory": activity.get("subcategory"),
+        "place": activity.get("place"),
+        "confidence": activity.get("confidence", 0.92),
+        "status": activity.get("status") or "completed",
+        "review_required": bool(activity.get("review_required")),
+        "review_reason": activity.get("review_reason"),
+        "parse_method": "structured",
+    }
+
+
 def summarize_sessions(sessions: list[dict], capacity_minutes: int | None = None) -> dict:
     total = sum(session["duration_minutes"] for session in sessions)
     by_area: dict[str, dict] = {}
@@ -286,12 +339,19 @@ def summarize_sessions(sessions: list[dict], capacity_minutes: int | None = None
 
 
 def sessions_for_date(date: str) -> list[dict]:
-    return [
+    structured = [
+        session
+        for activity in read_activity_sessions(date)
+        for session in [session_from_activity(activity)]
+        if session
+    ]
+    capture_candidates = [
         session
         for capture in read_captures(date, include_ignored=False)
         for session in [session_from_capture(capture)]
         if session
     ]
+    return structured + capture_candidates
 
 
 def generate_activity_allocation(date: str | None = None, now: datetime | None = None) -> dict:
@@ -299,7 +359,7 @@ def generate_activity_allocation(date: str | None = None, now: datetime | None =
     target_date = date or now.date().isoformat()
     target_dt = datetime.strptime(target_date, "%Y-%m-%d")
     day_capacity_minutes = 24 * 60
-    month_dates = capture_dates_for_month(target_date)
+    month_dates = sorted(set(capture_dates_for_month(target_date)) | set(activity_dates_for_month(target_date)))
     month_elapsed_days = target_dt.day
     month_capacity_minutes = month_elapsed_days * day_capacity_minutes
 
@@ -322,7 +382,8 @@ def generate_activity_allocation(date: str | None = None, now: datetime | None =
         "data_quality": {
             "status": "partial" if sessions else "empty",
             "notes": [
-                "Activity allocation is candidate-based and only parses clear time expressions.",
+            "Activity allocation is candidate-based and only parses clear time expressions.",
+            "Structured Nomad Quick activity sessions are included when available.",
                 "Ambiguous or missing durations are excluded until correction rules are defined.",
                 "Daily share uses 24 hours as capacity. Monthly share uses elapsed days in the selected month.",
             ],

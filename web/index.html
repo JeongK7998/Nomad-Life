@@ -14,29 +14,67 @@
         window.location.replace(`http://127.0.0.1:4174/web/${window.location.hash || ""}`);
       }
     </script>
-    <link rel="manifest" href="/manifest.webmanifest?v=20260506-pwa" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/workout-icon-192.png?v=20260506-pwa" />
-    <link rel="apple-touch-icon" href="/icons/workout-icon-180.png?v=20260506-pwa" />
-    <link rel="stylesheet" href="design-tokens.css?v=20260506-sync-freshness" />
-    <link rel="stylesheet" href="styles.css?v=20260506-sync-freshness" />
+    <link rel="manifest" href="/web/manifest.webmanifest?v=20260515-home-icon" />
+    <link rel="icon" type="image/svg+xml" href="/web/icons/nomad-life-icon.svg?v=20260515-home-icon" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/web/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/web/icon-512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/web/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="/web/apple-touch-icon.png" />
+    <link rel="stylesheet" href="design-tokens.css?v=20260515-accent-area" />
+    <link rel="stylesheet" href="styles.css?v=20260522-mobile-dialog-fixes" />
   </head>
   <body>
     <div class="app-shell">
+      <div class="mobile-topbar">
+        <button id="open-menu-button" class="mobile-menu-button" type="button" aria-label="메뉴 열기">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </button>
+        <div class="mobile-title-block">
+          <strong class="mobile-app-title">Nomad Life</strong>
+          <span id="mobile-view-title" class="mobile-view-subtitle">Main Agent</span>
+          <span id="mobile-active-stay" class="active-stay-pill">지역 미설정</span>
+        </div>
+        <button id="floating-quick-button" class="mobile-quick-button" type="button">Quick</button>
+      </div>
+      <button id="drawer-backdrop" class="drawer-backdrop" type="button" aria-label="메뉴 닫기"></button>
       <aside class="sidebar">
-        <div>
+        <div class="sidebar-header">
           <p class="eyebrow">Hermes Dashboard</p>
           <h1>Nomad Life</h1>
+          <span id="active-stay-pill" class="active-stay-pill">지역 미설정</span>
+          <button id="close-menu-button" class="mobile-drawer-close" type="button" aria-label="메뉴 닫기">Close</button>
         </div>
         <nav aria-label="Dashboard workspaces">
-          <a href="#today" data-view-link="today">Today</a>
-          <a href="#capture" data-view-link="capture">Capture</a>
-          <a href="#health" data-view-link="health">Health</a>
+          <a href="#main" data-view-link="main">Main Agent</a>
+          <a href="#capture" data-view-link="capture">Input History</a>
+          <a href="#daily" data-view-link="daily">Daily Detail</a>
           <a href="#activity" data-view-link="activity">Activity</a>
-          <a href="#finance" data-view-link="finance">Finance</a>
-          <a href="#context" data-view-link="context">Context</a>
-          <a href="#council" data-view-link="council">Council</a>
+          <a href="#ai-work" data-view-link="ai-work">AI Work</a>
+          <a href="#health" data-view-link="health">Health Agent</a>
+          <a href="#english" data-view-link="english">English Agent</a>
+          <a href="#finance" data-view-link="finance">Finance Agent</a>
+          <a href="#context" data-view-link="context">Context Agents</a>
+          <a href="#council" data-view-link="council">Agent Council</a>
           <a href="#reports" data-view-link="reports">Reports</a>
+          <a href="#settings" data-view-link="settings">Settings</a>
         </nav>
+        <section id="auth-panel" class="auth-panel" hidden aria-label="Nomad Life 로그인">
+          <div>
+            <p class="eyebrow">Nomad Cloud</p>
+            <strong id="auth-user"></strong>
+            <span>로그인하면 이 기기/앱의 세션이 유지되고, 저장한 입력은 분석과 Dashboard 반영 대상으로 이어집니다.</span>
+          </div>
+          <form id="auth-form" class="auth-form">
+            <input id="auth-email" name="email" type="email" autocomplete="email" placeholder="이메일" aria-label="이메일" required />
+            <input id="auth-password" name="password" type="password" autocomplete="current-password" placeholder="비밀번호" aria-label="비밀번호" minlength="6" required />
+            <button id="auth-sign-in" type="submit">로그인</button>
+            <button id="auth-sign-up" class="button-secondary" type="submit">계정 만들기</button>
+          </form>
+          <button id="auth-sign-out" class="button-secondary" type="button" hidden>로그아웃</button>
+          <p id="auth-status" role="status">Save는 즉시 저장되고, Hermes는 이후 분석과 Dashboard 반영을 수행합니다.</p>
+        </section>
       </aside>
 
       <main>
@@ -44,29 +82,180 @@
           <div id="workspace-overview" class="overview-grid"></div>
         </section>
 
-        <div class="workspace-view" data-view="capture" id="capture">
-        <section class="section capture-section">
-          <div class="section-heading">
-            <p class="eyebrow">Input</p>
-            <h2>Quick Capture</h2>
-          </div>
-          <form id="capture-form" class="capture-form">
-            <textarea id="capture-text" name="capture" rows="4" placeholder="오늘의 작업, 식사, 지출, 컨디션을 짧게 남기기"></textarea>
-            <div class="form-row">
-              <button type="submit">Capture</button>
-              <button id="sync-inbox-button" class="button-secondary" type="button">Sync Inbox</button>
-              <p id="capture-status" role="status"></p>
+        <div class="workspace-view active" data-view="main" id="main">
+          <section class="section main-agent-cockpit">
+            <div class="main-agent-topline">
+              <div>
+                <p class="eyebrow">Main Agent</p>
+                <h2>Life Direction Cockpit</h2>
+              </div>
+              <button id="main-period-toggle" class="button-secondary" type="button">Month</button>
             </div>
-          </form>
-        </section>
 
+            <div class="main-agent-focus-grid">
+              <div class="main-agent-brief">
+                <p id="main-agent-summary" class="summary"></p>
+                <div id="main-agent-metrics" class="main-kpi-strip"></div>
+              </div>
+
+              <div class="main-share-panel">
+                <div class="mini-panel-heading">
+                  <span>활동 비중</span>
+                  <strong id="main-share-title">Month</strong>
+                </div>
+                <div id="main-month-bars" class="life-bars"></div>
+              </div>
+            </div>
+
+            <div class="main-agent-grid">
+              <div class="main-days-panel">
+                <div class="mini-panel-heading">
+                  <span>날짜별 활동 면적</span>
+                  <strong>Max day = 100%</strong>
+                </div>
+                <div id="main-daily-bars" class="daily-area-chart"></div>
+              </div>
+              <div class="main-signal-panel">
+                <div class="mini-panel-heading">
+                  <span>운영 신호</span>
+                  <strong>Agent Council</strong>
+                </div>
+                <div id="main-agent-signals" class="main-signal-list"></div>
+              </div>
+            </div>
+
+            <div id="main-cumulative" class="main-area-legend"></div>
+          </section>
+        </div>
+
+        <dialog id="quick-dialog" class="quick-dialog">
+          <section class="section nomad-quick-section quick-dialog-panel">
+            <div class="section-heading with-action">
+              <div>
+                <p class="eyebrow">Nomad Quick</p>
+                <h2>Quick Input</h2>
+              </div>
+            </div>
+            <form id="activity-form" class="activity-form">
+              <fieldset class="quick-choice-group" aria-label="Input area">
+                <div class="quick-chip-grid" data-activity-area-group>
+                  <label><input type="radio" name="area" value="work" checked /> <span>Work</span></label>
+                  <label><input type="radio" name="area" value="health" /> <span>Health</span></label>
+                  <label><input type="radio" name="area" value="food" /> <span>Food</span></label>
+                  <label><input type="radio" name="area" value="english" /> <span>English</span></label>
+                  <label><input type="radio" name="area" value="creator" /> <span>Creator</span></label>
+                  <label><input type="radio" name="area" value="travel" /> <span>Travel</span></label>
+                  <label><input type="radio" name="area" value="social" /> <span>Social</span></label>
+                  <label><input type="radio" name="area" value="rest" /> <span>Rest</span></label>
+                </div>
+              </fieldset>
+
+              <section class="quick-timer" aria-label="날짜와 소요 시간">
+                <div class="quick-time-row">
+                  <label class="quick-date-field">
+                    <input id="activity-date" name="date" type="date" aria-label="활동 날짜" />
+                  </label>
+                  <div class="quick-duration-summary" aria-live="polite">
+                    <span>소요시간</span>
+                    <strong id="activity-duration-label">1시간</strong>
+                  </div>
+                </div>
+                <div class="quick-timer-control">
+                  <label class="duration-slider-label">
+                    <input id="activity-duration-slider" name="duration_minutes" type="range" min="30" max="300" step="15" value="60" />
+                    <span class="duration-ticks" aria-hidden="true">
+                      <span>0.5h</span>
+                      <span>1h</span>
+                      <span>1.5h</span>
+                      <span>2h</span>
+                      <span>2.5h</span>
+                      <span>3h</span>
+                      <span>3.5h</span>
+                      <span>4h</span>
+                      <span>4.5h</span>
+                      <span>5h</span>
+                    </span>
+                  </label>
+                </div>
+              </section>
+
+              <section id="health-quick-builder" class="health-quick-builder" hidden>
+                <div class="mini-panel-heading">
+                  <span>운동 항목</span>
+                  <strong id="health-quick-total">0분</strong>
+                </div>
+                <div id="health-activity-draft-list" class="health-activity-draft-list"></div>
+                <button id="add-health-activity" type="button">운동 추가</button>
+              </section>
+
+              <label class="quick-note-field">
+                <textarea id="activity-detail" name="detail" rows="2" placeholder="무엇을 했는지 한 줄로 남기기"></textarea>
+              </label>
+
+              <details class="quick-optional">
+                <summary>디테일</summary>
+                <div class="quick-secondary-grid">
+                  <label>
+                    <span>장소</span>
+                    <select id="activity-place" name="place">
+                      <option value="">선택 안함</option>
+                      <option value="cafe">카페</option>
+                      <option value="home">숙소</option>
+                      <option value="gym">헬스장</option>
+                      <option value="outdoor">야외</option>
+                      <option value="transit">이동중</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>소분류</span>
+                    <input id="activity-subcategory" name="subcategory" type="text" placeholder="예: vibe coding" />
+                  </label>
+                </div>
+                <label class="quick-checkbox">
+                  <input id="activity-parse-memo" name="parse_memo" type="checkbox" />
+                  <span>메모를 구조화 후보로 분석</span>
+                </label>
+              </details>
+
+              <div class="form-row quick-action-row">
+                <button id="close-quick-button" class="button-secondary" type="button">Close</button>
+                <button type="submit">Save</button>
+                <button id="delete-routine-card" class="button-secondary danger-action" type="button" hidden>Delete Routine Card</button>
+                <p id="activity-status" role="status"></p>
+              </div>
+            </form>
+          </section>
+        </dialog>
+
+        <div class="workspace-view" data-view="capture" id="capture">
         <section id="captures" class="section">
-          <div class="section-heading">
-            <p class="eyebrow">Data</p>
-            <h2>Recent Captures</h2>
+          <div class="section-heading with-action capture-history-heading">
+            <h2>Input History</h2>
+            <div class="history-toolbar" aria-label="Input history view options">
+              <select id="capture-year-filter" aria-label="히스토리 연도"></select>
+              <select id="capture-month-filter" aria-label="히스토리 월"></select>
+              <select id="capture-status-filter" aria-label="히스토리 보기 옵션">
+                <option value="applied">현재 원장</option>
+                <option value="all">모두 보기</option>
+                <option value="canceled">취소된 것만</option>
+                <option value="review">대기/확인 필요</option>
+              </select>
+            </div>
           </div>
+          <p id="capture-status" class="section-subtext" role="status"></p>
           <div id="captures-list" class="captures-list"></div>
         </section>
+        <dialog id="capture-detail-dialog" class="capture-detail-dialog">
+          <form method="dialog">
+            <div class="dialog-heading">
+              <div>
+                <p class="eyebrow">History Detail</p>
+                <h2 id="capture-detail-title">Input</h2>
+              </div>
+            </div>
+            <div id="capture-detail-content" class="capture-detail-content"></div>
+          </form>
+        </dialog>
         </div>
 
         <div class="workspace-view" data-view="health" id="health">
@@ -77,21 +266,39 @@
                 <h2>Muscle Schedule</h2>
               </div>
               <div id="health-summary" class="metric-strip"></div>
+              <div class="health-input-launcher">
+                <button id="open-workout-dialog" type="button">운동 입력</button>
+              </div>
+              <p id="health-window-note" class="section-subtext"></p>
+              <section class="health-today-panel">
+                <h3 class="panel-title">Today Candidates</h3>
+                <div id="health-recommendations" class="health-recommendations"></div>
+              </section>
+              <details class="health-readiness-panel">
+                <summary>
+                  <span>Readiness Detail</span>
+                  <small>부위별 공백 진단 보기</small>
+                </summary>
+                <div id="health-readiness" class="health-readiness"></div>
+              </details>
               <div class="routine-panel">
-                <div class="section-heading with-action">
+                <div class="routine-panel-heading">
                   <div>
                     <p class="eyebrow">Workout Routine</p>
                     <h3>루틴 카드</h3>
                   </div>
-                  <div class="routine-nav">
-                    <button id="routine-prev" class="button-ghost" type="button" aria-label="이전 루틴">‹</button>
-                    <button id="routine-next" class="button-ghost" type="button" aria-label="다음 루틴">›</button>
+                  <div class="routine-month-controls" aria-label="루틴 월 선택">
+                    <select id="routine-year-select" aria-label="루틴 연도"></select>
+                    <select id="routine-month-select" aria-label="루틴 월"></select>
                   </div>
                 </div>
-                <div id="routine-filters" class="routine-filters"></div>
+                <div class="routine-nav">
+                  <button id="routine-prev" class="button-ghost" type="button" aria-label="이전 루틴">‹</button>
+                  <button id="routine-next" class="button-ghost" type="button" aria-label="다음 루틴">›</button>
+                </div>
                 <div id="routine-track" class="routine-track"></div>
               </div>
-              <div class="exercise-history-panel">
+              <div class="exercise-history-panel" hidden>
                 <div class="section-heading">
                   <p class="eyebrow">Exercise History</p>
                   <h3 id="exercise-history-title">운동을 선택하세요</h3>
@@ -101,49 +308,30 @@
               <div id="muscle-heatmap" class="muscle-heatmap"></div>
               <div class="muscle-summary-panel">
                 <h3 class="panel-title">Muscle Summary</h3>
-                <div id="muscle-summary" class="muscle-map"></div>
+              <div id="muscle-summary" class="muscle-map"></div>
               </div>
-              <h3 class="panel-title">Selected Detail</h3>
-              <div id="muscle-detail" class="captures-list"></div>
-              <div class="health-decision-grid">
-                <div>
-                  <h3 class="panel-title">Readiness</h3>
-                  <div id="health-readiness" class="health-readiness"></div>
-                </div>
-                <div>
-                  <h3 class="panel-title">Today Candidates</h3>
-                  <div id="health-recommendations" class="health-recommendations"></div>
-                </div>
-              </div>
+              <section class="muscle-detail-panel">
+                <h3 class="panel-title">Selected Detail</h3>
+                <div id="muscle-detail" class="captures-list"></div>
+              </section>
             </section>
+          </div>
+        </div>
 
-            <section id="workout" class="section workout-section">
-              <div class="section-heading workout-heading">
-                <div>
-                  <p class="eyebrow">Quick Log</p>
-                  <h2>Workout Detail</h2>
-                  <p id="workout-time-status" class="section-subtext">현재 시간 적용됨</p>
-                </div>
-                <a class="quick-link" href="/web/workout-quick.html">Quick</a>
+        <dialog id="workout-dialog" class="workout-dialog">
+          <section class="section workout-dialog-panel">
+            <div class="section-heading workout-heading">
+              <div>
+                <p class="eyebrow">Health Quick</p>
+                <h2>운동 디테일 입력</h2>
               </div>
+            </div>
               <form id="workout-form" class="workout-form">
+                <p id="workout-time-status" class="visually-hidden">시간은 Quick 운동 항목에서 관리됩니다.</p>
                 <div class="form-grid form-grid-compact workout-input-grid">
-                  <div class="time-confirm">
-                    <span>시작 시간</span>
-                    <button id="open-workout-time" class="button-secondary" type="button">날짜/시간 선택</button>
-                    <div id="workout-time-popover" class="time-popover" hidden>
-                      <label>
-                        <span>날짜</span>
-                        <input id="workout-start-date" name="started_date" type="date" />
-                      </label>
-                      <label>
-                        <span>시간</span>
-                        <input id="workout-start-time" name="started_time" type="time" />
-                      </label>
-                      <button id="apply-workout-time" type="button">완료</button>
-                    </div>
-                  </div>
-                  <label>
+                  <input id="workout-start-date" name="started_date" type="hidden" />
+                  <input id="workout-start-time" name="started_time" type="hidden" />
+                  <label class="workout-muscle-field">
                     <span>부위</span>
                     <select id="workout-muscle" name="muscle">
                       <option value="chest">가슴</option>
@@ -156,17 +344,23 @@
                       <option value="other">기타</option>
                     </select>
                   </label>
-                  <label>
+                  <label class="workout-exercise-field">
                     <span>운동</span>
                     <select id="workout-exercise" name="exercise"></select>
                   </label>
                   <input id="exercise-search" name="exercise_search" type="hidden" />
                   <div class="exercise-actions">
-                    <button id="favorite-exercise" class="button-ghost" type="button" aria-label="좋아요">♡</button>
-                    <button id="exercise-detail" class="button-ghost" type="button" aria-label="운동 정보">i</button>
+                    <button id="favorite-exercise" class="button-ghost" type="button" aria-label="즐겨찾기" title="즐겨찾기">♡</button>
+                    <button id="quick-add-exercise" class="button-ghost" type="button" aria-label="운동 추가" title="운동 추가">＋</button>
+                    <button id="exercise-detail" class="button-ghost" type="button" aria-label="운동 정보" title="운동 정보">i</button>
+                    <button id="exercise-recent" class="button-ghost" type="button" aria-label="최근 운동 기록" title="최근 운동 기록">↺</button>
                   </div>
-                  <p id="latest-exercise-guide" class="latest-exercise-guide">이전 운동 기록이 있으면 여기에 표시됩니다.</p>
+                  <p id="latest-exercise-guide" class="latest-exercise-guide" hidden>이전 운동 기록이 있으면 여기에 표시됩니다.</p>
                   <div class="workout-number-row">
+                    <label class="workout-bodyweight-check" aria-label="맨몸운동" title="맨몸운동">
+                      <input id="workout-bodyweight" name="bodyweight" type="checkbox" />
+                      <span class="visually-hidden">맨몸운동</span>
+                    </label>
                     <label>
                       <span>무게 kg</span>
                       <input id="workout-weight" name="weight" type="number" inputmode="decimal" min="0" step="0.5" value="60" />
@@ -175,14 +369,11 @@
                       <span>반복</span>
                       <input id="workout-reps" name="reps" type="number" inputmode="numeric" min="1" step="1" value="10" />
                     </label>
-                    <label>
-                      <span>RPE</span>
-                      <input id="workout-rpe" name="rpe" type="number" inputmode="decimal" min="1" max="10" step="0.5" placeholder="선택" />
-                    </label>
+                    <button id="add-workout-set" type="button">세트 추가</button>
                   </div>
                 </div>
                 <div class="form-row add-set-row">
-                  <button id="add-workout-set" type="button">Add Set</button>
+                  <input id="workout-rpe" name="rpe" type="hidden" />
                   <p id="workout-status" role="status"></p>
                 </div>
                 <div id="workout-set-list" class="workout-draft-list"></div>
@@ -191,12 +382,12 @@
                   <textarea id="workout-note" name="note" rows="3" placeholder="기구 상태, 통증, 컨디션, 자세 메모"></textarea>
                 </label>
                 <div class="workout-save-row">
-                  <button id="save-workout-session" class="button-secondary" type="submit">End Workout & Save</button>
+                  <button id="close-workout-dialog" class="button-secondary" type="button">Close</button>
+                  <button id="save-workout-session" class="button-secondary" type="submit">디테일 완료</button>
                 </div>
               </form>
-            </section>
-          </div>
-        </div>
+          </section>
+        </dialog>
 
         <dialog id="exercise-dialog" class="exercise-dialog">
           <form method="dialog">
@@ -211,10 +402,115 @@
           </form>
         </dialog>
 
-        <div class="workspace-view active" data-view="today" id="today">
+        <div class="workspace-view" data-view="english" id="english">
+          <section class="section english-section">
+            <div class="section-heading with-action english-heading">
+              <div>
+                <p class="eyebrow">English Agent</p>
+                <div class="english-title-row">
+                  <h2>Speaking Pattern Review</h2>
+                  <details id="english-import-details" class="english-import-details" hidden>
+                    <summary>Import details</summary>
+                    <ul id="english-import-detail-list"></ul>
+                  </details>
+                </div>
+                <section class="english-load-graph-panel" aria-label="English review load status">
+                  <div id="english-review-file-stats" class="english-review-file-stats"></div>
+                  <div id="english-review-file-graph" class="english-review-file-graph"></div>
+                </section>
+                <p id="english-sync-status" class="workspace-action-status" role="status"></p>
+              </div>
+              <button id="sync-english-reviews-button" class="button-secondary" type="button">English 업데이트</button>
+            </div>
+            <section class="english-panel english-decision-panel">
+              <h3 class="panel-title">Today Decision</h3>
+              <div id="english-decision-header" class="english-decision-header"></div>
+            </section>
+            <section class="english-panel english-continuity-panel">
+              <h3 class="panel-title">Learning Continuity</h3>
+              <div id="english-summary" class="english-continuity"></div>
+            </section>
+            <div class="english-flow-grid">
+              <div class="english-agent-panel">
+                <h3 class="panel-title">Today Interpretation</h3>
+                <p id="english-agent-interpretation"></p>
+                <section id="english-validation-section" class="english-validation-section">
+                  <div id="english-validation-agent" class="english-list"></div>
+                </section>
+              </div>
+              <section class="english-panel english-panel-primary" id="english-issue-section">
+                <h3 class="panel-title">Repeated Issues & Progress</h3>
+                <div id="english-issue-tracker" class="english-list"></div>
+              </section>
+              <section class="english-panel english-drilldown-panel" id="english-pre-study-section">
+                <details>
+                  <summary>Next GPTs Context</summary>
+                  <pre id="english-pre-study-context" class="english-pre-study-context"></pre>
+                </details>
+              </section>
+              <section class="english-panel english-drilldown-panel" id="english-daily-log-section">
+                <details>
+                  <summary>Daily Review Log</summary>
+                  <div id="english-daily-log" class="english-daily-log"></div>
+                  <div id="english-daily-log-pager" class="daily-log-pager"></div>
+                </details>
+              </section>
+              <section class="english-panel english-drilldown-panel" id="english-performance-section">
+                <details>
+                  <summary>Performance Evidence</summary>
+                  <div id="english-performance-metrics" class="english-list"></div>
+                </details>
+              </section>
+              <section class="english-panel english-drilldown-panel" id="english-corrections-section">
+                <details>
+                  <summary>Corrections</summary>
+                  <div id="english-corrections" class="english-list"></div>
+                </details>
+              </section>
+              <section class="english-panel" id="english-progression-section">
+                <h3 class="panel-title">Study Schedule</h3>
+                <div id="english-progression" class="english-list"></div>
+              </section>
+              <section class="english-panel" id="english-habits-section">
+                <h3 class="panel-title">Habit Signals</h3>
+                <div id="english-habits" class="english-list"></div>
+              </section>
+              <section class="english-panel" id="english-learned-section">
+                <h3 class="panel-title">Learned Expressions</h3>
+                <div id="english-learned-items" class="english-list"></div>
+              </section>
+              <section class="english-panel" id="english-next-actions-section">
+                <h3 class="panel-title">Next Actions</h3>
+                <div id="english-next-actions" class="english-list"></div>
+              </section>
+              <section class="english-panel" id="english-review-cards-section">
+                <h3 class="panel-title">Review Cards</h3>
+                <div id="english-review-cards" class="english-list"></div>
+              </section>
+              <section class="english-panel" id="english-habit-recommendations-section">
+                <h3 class="panel-title">Habit Recommendations</h3>
+                <div id="english-habit-recommendations" class="english-list"></div>
+              </section>
+              <section class="english-panel english-drilldown-panel" id="english-weekly-section">
+                <details>
+                  <summary>Weekly Summary</summary>
+                  <div id="english-weekly-summary" class="english-list"></div>
+                </details>
+              </section>
+              <section class="english-panel english-drilldown-panel" id="english-reviews-section">
+                <details>
+                  <summary>Recent GPTs Reviews</summary>
+                  <div id="english-reviews" class="english-list"></div>
+                </details>
+              </section>
+            </div>
+          </section>
+        </div>
+
+        <div class="workspace-view" data-view="daily" id="daily">
         <section class="section">
           <div class="section-heading">
-            <p class="eyebrow">Today Dashboard</p>
+            <p class="eyebrow">Daily Detail</p>
             <h2 id="today-date">Today</h2>
           </div>
           <p id="summary" class="summary"></p>
@@ -244,10 +540,21 @@
         </div>
 
         <div class="workspace-view" data-view="finance" id="finance">
+        <section id="finance-review" class="section">
+          <div class="section-heading with-action">
+            <div>
+              <p class="eyebrow">Finance Agent</p>
+              <h2>Spending Review</h2>
+              <p id="finance-sync-status" class="workspace-action-status" role="status"></p>
+            </div>
+            <button id="sync-finance-button" class="button-secondary" type="button">Sync Finance</button>
+          </div>
+          <div id="finance-review-panel" class="finance-review-panel"></div>
+        </section>
         <section id="expense-candidates" class="section">
           <div class="section-heading">
-            <p class="eyebrow">Finance Review</p>
-            <h2>Imported Spending Signals</h2>
+            <p class="eyebrow">Candidates</p>
+            <h2>Capture Expense Candidates</h2>
           </div>
           <div id="expense-candidates-list" class="captures-list"></div>
         </section>
@@ -277,6 +584,7 @@
             <div>
               <p class="eyebrow">Local Apps</p>
               <h2>Local Context</h2>
+              <p id="local-context-sync-status" class="workspace-action-status" role="status"></p>
             </div>
             <button id="sync-local-apps-button" class="button-secondary" type="button">Refresh</button>
           </div>
@@ -327,9 +635,277 @@
           <div id="activity-sessions" class="captures-list"></div>
         </section>
         </div>
+
+        <div class="workspace-view" data-view="ai-work" id="ai-work">
+          <section class="section ai-work-section">
+            <div class="section-heading with-action">
+              <div>
+                <p class="eyebrow">AI Work Agent</p>
+                <h2>Project Cockpit</h2>
+                <p id="ai-work-status" class="workspace-action-status" role="status"></p>
+              </div>
+              <div class="section-actions">
+                <button id="ai-work-add-button" type="button">Add</button>
+                <button id="ai-work-edit-button" class="button-secondary" type="button">Edit</button>
+                <button id="ai-work-import-button" class="button-secondary" type="button">Check</button>
+              </div>
+            </div>
+
+            <div id="ai-work-summary" class="metric-strip"></div>
+            <div id="ai-work-visuals" class="ai-work-visuals"></div>
+
+            <section class="ai-work-project-board">
+              <div class="mini-panel-heading">
+                <span>Project Dashboard</span>
+                <strong id="ai-work-project-count">0</strong>
+              </div>
+              <div id="ai-work-projects" class="ai-work-project-list"></div>
+            </section>
+
+            <section class="ai-work-panel ai-work-detail-panel">
+              <div class="mini-panel-heading">
+                <span>Project Detail</span>
+                <strong id="ai-work-detail-title">Select</strong>
+              </div>
+              <div id="ai-work-detail" class="ai-work-detail"></div>
+            </section>
+          </section>
+
+          <dialog id="ai-work-project-dialog" class="ai-work-dialog">
+            <section class="section ai-work-dialog-panel">
+              <div class="section-heading with-action">
+                <div>
+                  <p class="eyebrow">AI Work Project</p>
+                  <h2 id="ai-work-dialog-title">Add Project</h2>
+                  <p id="ai-work-form-status" class="workspace-action-status" role="status"></p>
+                </div>
+                <button id="ai-work-dialog-close" class="button-secondary" type="button">Close</button>
+              </div>
+              <form id="ai-work-project-form" class="ai-work-form">
+                <input id="ai-work-project-mode" name="mode" type="hidden" value="create" />
+                <input id="ai-work-project-id" name="project_id" type="hidden" />
+                <div class="quick-secondary-grid">
+                  <label>
+                    <span>Project Name</span>
+                    <input id="ai-work-project-name" name="name" type="text" placeholder="예: Motion Client A" required />
+                  </label>
+                  <label>
+                    <span>Project Type</span>
+                    <select id="ai-work-project-type" name="type">
+                      <option value="ai-product">AI Product</option>
+                      <option value="motion-client">Motion Client</option>
+                      <option value="creative-project">Creative Project</option>
+                      <option value="client-work">Client Work</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="quick-secondary-grid">
+                  <label>
+                    <span>Status</span>
+                    <select id="ai-work-project-status" name="status">
+                      <option value="in_progress">In Progress</option>
+                      <option value="planning">Planning</option>
+                      <option value="blocked">Blocked</option>
+                      <option value="review_needed">Review Needed</option>
+                      <option value="paused">Paused</option>
+                      <option value="shipped">Shipped</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Priority</span>
+                    <select id="ai-work-project-priority" name="priority">
+                      <option value="P1">P1</option>
+                      <option value="P2">P2</option>
+                      <option value="P3">P3</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  <span>Local Folder Path</span>
+                  <div class="inline-input-action">
+                    <input id="ai-work-project-path" name="path" type="text" placeholder="/Users/jongiljeong/Projects/Project_Name" required />
+                    <button id="ai-work-browse-folder" class="button-secondary" type="button">Browse</button>
+                  </div>
+                </label>
+                <label>
+                  <span>Current Focus</span>
+                  <textarea id="ai-work-current-focus" name="current_focus" rows="2" placeholder="지금 이 프로젝트에서 보고 싶은 한 가지"></textarea>
+                </label>
+                <label>
+                  <span>Next Action</span>
+                  <textarea id="ai-work-next-action" name="next_action" rows="2" placeholder="다음에 열었을 때 바로 할 수 있는 행동"></textarea>
+                </label>
+                <label>
+                  <span>Success Criteria</span>
+                  <textarea id="ai-work-success-criteria" name="success_criteria" rows="3" placeholder="한 줄에 하나씩"></textarea>
+                </label>
+                <div class="quick-secondary-grid">
+                  <label>
+                    <span>Sensitivity</span>
+                    <select id="ai-work-sensitivity" name="sensitivity">
+                      <option value="personal-private">Personal Private</option>
+                      <option value="client-private">Client Private</option>
+                      <option value="public">Public</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Evidence Mode</span>
+                    <select id="ai-work-evidence-mode" name="evidence_mode">
+                      <option value="codex_and_git">Codex + Git</option>
+                      <option value="git_dirty">Git Dirty</option>
+                      <option value="commits_only">Commits Only</option>
+                      <option value="manual_notes">Manual Notes</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  <span>Output Folder Path</span>
+                  <input id="ai-work-output-path" name="output_path" type="text" placeholder="/Users/jongiljeong/Movies/Project/renders" />
+                </label>
+                <label>
+                  <span>Aliases</span>
+                  <input id="ai-work-project-aliases" name="aliases" type="text" placeholder="쉼표로 구분" />
+                </label>
+                <label>
+                  <span>Exclude Paths</span>
+                  <textarea id="ai-work-exclude-paths" name="exclude_paths" rows="3" placeholder=".env&#10;node_modules/&#10;data/backups/"></textarea>
+                </label>
+                <fieldset class="quick-choice-group">
+                  <legend>Evidence Sources</legend>
+                  <div class="quick-chip-grid ai-work-source-grid">
+                    <label><input type="checkbox" name="evidence_source" value="git" checked /> <span>Git</span></label>
+                    <label><input type="checkbox" name="evidence_source" value="codex" checked /> <span>Codex</span></label>
+                    <label><input type="checkbox" name="evidence_source" value="output_folder" /> <span>Output</span></label>
+                  </div>
+                </fieldset>
+                <label class="checkbox-row">
+                  <input id="ai-work-publish-dashboard" name="publish_to_dashboard" type="checkbox" checked />
+                  <span>Show on dashboard</span>
+                </label>
+                <div class="form-row">
+                  <button id="ai-work-submit-project" type="submit">Save Project</button>
+                </div>
+              </form>
+            </section>
+          </dialog>
+        </div>
+
+        <div class="workspace-view" data-view="settings" id="settings">
+          <section class="section">
+            <div class="section-heading">
+              <p class="eyebrow">Settings</p>
+              <h2>운영 기준</h2>
+            </div>
+            <form id="current-stay-form" class="settings-grid">
+              <label>
+                <span>Stay ID</span>
+                <input id="settings-stay-id" name="stay_id" type="text" placeholder="예: bali-2026-05" required />
+              </label>
+              <label>
+                <span>Region</span>
+                <input id="settings-current-place" name="region" type="text" placeholder="예: Bali, Canggu, Tokyo" required />
+              </label>
+              <label>
+                <span>Country</span>
+                <input id="settings-country" name="country" type="text" placeholder="예: Indonesia" />
+              </label>
+              <label>
+                <span>Start Day</span>
+                <input id="settings-start-date" name="start_date" type="date" required />
+              </label>
+              <label>
+                <span>End Day</span>
+                <input id="settings-end-date" name="end_date" type="date" />
+                <small>비워두면 현재 진행중인 활성 지역입니다. 종료일을 넣으면 완료 지역으로 이동합니다.</small>
+              </label>
+              <label>
+                <span>Timezone</span>
+                <select id="settings-timezone" name="timezone">
+                  <option value="Asia/Makassar">Bali / Asia/Makassar</option>
+                  <option value="Asia/Seoul">Korea / Asia/Seoul</option>
+                  <option value="Asia/Tokyo">Japan / Asia/Tokyo</option>
+                  <option value="Asia/Bangkok">Thailand / Asia/Bangkok</option>
+                  <option value="Asia/Singapore">Singapore / Asia/Singapore</option>
+                  <option value="Europe/London">UK / Europe/London</option>
+                  <option value="Europe/Paris">Europe / Europe/Paris</option>
+                  <option value="America/Los_Angeles">US West / America/Los_Angeles</option>
+                  <option value="America/New_York">US East / America/New_York</option>
+                </select>
+              </label>
+              <label>
+                <span>Dataset Scope</span>
+                <select id="settings-dataset-scope" name="dataset_scope">
+                  <option value="current">현재 장소 기준</option>
+                  <option value="all">전체 장소 통합</option>
+                </select>
+              </label>
+              <label class="settings-wide">
+                <span>Note</span>
+                <input id="settings-stay-note" name="note" type="text" placeholder="예: Bali real-use data package" />
+              </label>
+              <div class="form-row settings-wide">
+                <button type="submit">Save Stay</button>
+                <p id="current-stay-status" role="status"></p>
+              </div>
+            </form>
+            <div class="stay-index-panel">
+              <div class="mini-panel-heading">
+                <span>Stay Timeline</span>
+                <strong id="stay-index-count">0</strong>
+              </div>
+              <div id="stay-index-list" class="stay-index-list"></div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-heading">
+              <p class="eyebrow">Agent Control</p>
+              <h2>에이전트 활성화</h2>
+            </div>
+            <div class="agent-settings-grid">
+              <label><input type="checkbox" checked /> <span>Main Agent</span></label>
+              <label><input type="checkbox" checked /> <span>Health Agent</span></label>
+              <label><input type="checkbox" checked /> <span>English Agent</span></label>
+              <label><input type="checkbox" checked /> <span>Finance Agent</span></label>
+              <label><input type="checkbox" checked /> <span>Context Agents</span></label>
+              <label><input type="checkbox" /> <span>Travel Agent</span></label>
+              <label><input type="checkbox" /> <span>Creator Agent</span></label>
+              <label><input type="checkbox" /> <span>Rest Agent</span></label>
+            </div>
+          </section>
+
+          <section id="exercise-library-settings" class="section workout-section">
+            <div class="section-heading workout-heading">
+              <div>
+                <p class="eyebrow">Exercise Library</p>
+                <h2>운동 리스트 관리</h2>
+                <p class="section-subtext">전체 운동 목록의 추가, 수정, 숨김, 순서는 Settings에서 면밀하게 관리합니다.</p>
+              </div>
+              <div class="library-heading-actions">
+                <button id="exercise-edit-mode" class="button-secondary" type="button">편집</button>
+              </div>
+            </div>
+            <p id="exercise-library-status" class="section-subtext" role="status"></p>
+            <div id="exercise-library-summary" class="metric-strip"></div>
+            <div id="exercise-category-list" class="exercise-category-list"></div>
+          </section>
+
+          <section class="section">
+            <div class="section-heading">
+              <p class="eyebrow">Maintenance</p>
+              <h2>백업과 데이터 관리</h2>
+            </div>
+            <div class="settings-action-list">
+              <button id="stay-backup-button" class="button-secondary" type="button">Backup Current Stay</button>
+              <button class="button-secondary" type="button" disabled>Export Dashboard Snapshot</button>
+              <button class="button-secondary" type="button" disabled>Manage Location Datasets</button>
+            </div>
+            <p id="stay-backup-status" class="section-subtext" role="status">현재 체류지 패키지와 로컬 백업을 수동으로 생성할 수 있습니다.</p>
+          </section>
+        </div>
       </main>
     </div>
 
-    <script src="app.js?v=20260506-sync-freshness" type="module"></script>
+    <script src="app.js?v=20260522-mobile-dialog-fixes" type="module"></script>
   </body>
 </html>

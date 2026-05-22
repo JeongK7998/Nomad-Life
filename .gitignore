@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 .DS_Store
+node_modules/
 .env
 .env.*
 !.env.example
@@ -9,6 +10,7 @@ __pycache__/
 local-secrets/
 .playwright-cli/
 output/playwright/
+output/validation/
 
 # Local/generated runtime artifacts. Keep directory contracts in the project,
 # but do not commit personal captures, reports, dashboards, or app snapshots.
@@ -19,6 +21,8 @@ data/sync/processed/**
 !data/sync/processed/.gitkeep
 dashboard/*.json
 reports/**/*.md
+reports/validation/*.html
+reports/validation/*.json
 reports/*.png
 
 # Local compiled bridge binaries.

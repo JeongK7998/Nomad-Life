@@ -142,6 +142,14 @@ Initial domains:
 - Health
 - English
 
+Validation skills are also part of the Skill Council, but they are advisory rather than domain-operating agents:
+
+- UX Flow Review validates end-to-end usability.
+- GUI Review validates visual layout and responsive implementation quality.
+- Review Value Review validates whether review content is concise, distinct, and useful at a glance.
+
+Use `docs/UX_VALIDATION_AGENTS.md` as the fixed protocol instead of creating temporary validation prompts each time.
+
 Future domains:
 
 - Food
@@ -249,12 +257,25 @@ This section is the working boundary for the next phase. It should be reviewed w
 The near-term MVP is not a feature-rich app. It is a stable operating loop:
 
 ```txt
-Input
+Nomad Quick PWA
   -> Local data contract
   -> Local context snapshot
   -> Hermes Coordinator interpretation
   -> Dashboard/report/candidate output
   -> User review through cockpit or Telegram
+```
+
+The product interaction model is now intentionally narrow:
+
+```txt
+Nomad Quick PWA
+  -> structured input
+
+Nomad Dashboard
+  -> analysis, visualization, review, approval
+
+Telegram + Hermes Coordinator
+  -> data-based conversation and orchestration
 ```
 
 The MVP should answer:
@@ -305,10 +326,18 @@ Use thin slices to validate block connections:
 
 7. Activity allocation dashboard slice
    - Parse clear time expressions from captures
+   - Store structured Nomad Quick activity input in `data/activity/activity-sessions.jsonl`
    - Generate `data/context/activity-allocation.json`
    - Generate `dashboard/activity-allocation.json`
    - Show today's tracked time, area shares, and candidate sessions in the Dashboard
    - Keep all sessions as candidates until correction/confirmation rules are agreed
+
+8. Nomad Quick PWA slice
+   - Use one PWA entry point for all structured activity input
+   - Keep first input to area, time mode, and short memo
+   - Save quickly before optional detail collection
+   - Route Health detail into the existing workout routine/set input module
+   - Treat natural language as memo or structure candidate, not the only input path
 
 ### Confirm Before Implementing
 

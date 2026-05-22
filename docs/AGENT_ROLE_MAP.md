@@ -98,8 +98,11 @@ Hermes가 초기에는 직접 하지 말아야 하는 일:
 | Schedule | P0 | 일정 밀도와 시간 제약 제공 | Apple Calendar context | schedule density, time pressure | Calendar read-only active |
 | Health | P1 | 운동 시간/종류/근력 세부/회복 신호 정리 | capture, structured workout form, future Apple Health export | health time, workout mix, body-part interval, strength progression, recovery signal | thin report active |
 | Finance | P1 | 외부 가계부 데이터를 읽고 지출 압력과 패턴 분석 | existing finance app export/download or read-only view | spend status, budget pressure, trend/risk commentary | read-only importer pending |
-| English | P1 | 영어 학습 시간과 학습 진전 추적 | capture, iCloud transcript folder later | study time, transcript count, progress signal | skill draft |
+| English | P1 | 누적 영어 학습 리뷰를 해석하고 반복 issue를 추적 | GPTs review JSON/MD, capture, iCloud transcript folder later | learning profile, issue tracker, recurrence checks, pre-study context | thin agent active |
 | Rest | P2 | 과부하와 회복 여지 조율 | capture, schedule, health | recovery vs productivity | conceptual |
+| UX Flow Review | P2 | 전체 사용자 흐름 검증 | URL, screenshots, dashboard data, user scenario | UX flow findings | documented validation skill |
+| GUI Review | P2 | 레이아웃/비주얼 구현 품질 검증 | screenshots, CSS/HTML/JS, design tokens | GUI findings | documented validation skill |
+| Review Value Review | P2 | 리뷰 콘텐츠 가치와 정보 밀도 검증 | dashboard JSON, reports, rendered review cards | content value findings | documented validation skill |
 | Creator/Social | P3 | 콘텐츠 업로드/조회수 raw data 확인 | future social export/API | content output, view trends | defer |
 | AI Work | P3 | AI 작업 방식과 산출물 정리 | capture, future git/Codex logs | work blocks, output signal | undefined, evolve slowly |
 
@@ -124,6 +127,20 @@ Current implementation:
 - Shared Coordinator input lives at `data/agent_reports/YYYY-MM-DD.json` and `data/context/agent-reports.json`.
 - Coordinator reads agent reports before falling back to raw capture-count summaries.
 - These reports are capture-based interpretation candidates, not autonomous agents with external app permissions.
+
+## Validation Agent Layer
+
+UX 검증은 매번 임시 프롬프트로 수행하지 않고 고정 Skill로 유지한다.
+
+Validation agents:
+
+- `nomad-ux-flow-review`: task flow, navigation, save/error/approval feedback, mobile usability.
+- `nomad-gui-review`: layout breakage, spacing, responsive behavior, visual artifacts, Design System alignment.
+- `nomad-review-value-review`: review content density, repetition, scanability, whole-picture usefulness.
+
+These agents are advisory. Coordinator synthesizes their findings into fix-now, defer, ask-user, or document decisions.
+
+Detailed protocol lives in `docs/UX_VALIDATION_AGENTS.md`.
 
 ## External Integration Boundaries
 
@@ -156,6 +173,20 @@ HealthKit 직접 연동은 별도 승인 후 진행한다.
 - 지출 내역은 다른 앱에서 주기적으로 download/export하거나 read-only view로 가져온다.
 - Supabase credential/API 접근은 별도 승인 후 진행한다.
 - 어렵다면 정해진 export 파일을 자동 다운로드하거나 로컬 폴더에 두는 방식을 먼저 검토한다.
+
+### Finance JSON Export Fallback
+
+가계부 앱 또는 서버에 안정적인 read-only 접근이 어렵다면, 사용자가 매일 JSON export를 내려받아 iCloud Drive 또는 local inbox에 넣는 방식을 정식 fallback으로 둔다.
+
+초기 원칙:
+
+- JSON export는 `data/expenses/imports/inbox/`로 가져와 normalized expense contract로 변환한다.
+- 현재 원본 export 폴더는 `/Users/jongiljeong/Library/Mobile Documents/com~apple~CloudDocs/Nomad_life/Finance`다.
+- iCloud Drive finance export 폴더는 primary database가 아니라 read-only dropbox다.
+- importer는 원본 JSON을 수정하지 않고, 처리 후 local processed 폴더로 복사하거나 이동한다.
+- 초기 importer는 `scripts/import_finance_exports.py`이며 Nomad Pocket JSON export를 읽는다.
+- Finance Agent는 소비 확인, 소비 패턴 분석, 예산 압력 감지, 조정 제안을 담당한다.
+- 가계부 원본 앱의 데이터 수정, 삭제, 카테고리 write-back은 사용자 승인 전에는 하지 않는다.
 
 ### English Transcript Folder
 

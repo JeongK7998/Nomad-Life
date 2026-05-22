@@ -4,7 +4,7 @@
 
 English tracks study time, transcript-based learning material, repeated weak expressions, and practical progress for nomad life.
 
-The goal is not generic language tutoring. The goal is to help the Coordinator understand what English practice happened, what material exists, and what small next step fits the user's schedule and energy.
+The goal is not generic language tutoring or a passive review viewer. The goal is to act as a specialized learning agent that accumulates daily review data, detects progress, repeated mistakes, fossilized habits, newly learned material, and the next smallest useful training focus.
 
 ## Input Data
 
@@ -21,6 +21,8 @@ The goal is not generic language tutoring. The goal is to help the Coordinator u
 
 - `data/captures/YYYY-MM-DD.jsonl`
 - `data/context/latest-captures.json`
+- iCloud GPTs English review folder: `/Users/jongiljeong/Library/Mobile Documents/com~apple~CloudDocs/Nomad_life/English`
+- Local import inbox: `data/english/gpts-reviews/inbox/`
 - Future `data/inbox/english-transcripts/` or configured iCloud transcript folder
 - `data/english/english-notes.json`
 - `AGENTS.md`
@@ -52,9 +54,12 @@ Speech-to-text, transcript summarization, and voice practice tools are later add
 4. Identify expressions, situations, or weak points if clearly present.
 5. Mark uncertain fields explicitly.
 6. Summarize daily and weekly study time.
-7. Track transcript count and freshness.
-8. Suggest one small practical next step to Coordinator.
-9. Log all writes.
+7. Build a cumulative learning profile across all available GPTs review records.
+8. Detect repeated mistakes, unresolved habits, improvement signals, and scenario coverage.
+9. Maintain an issue tracker with lifecycle status: watch, active, persistent, improving, resolved_candidate.
+10. Generate a pre-study context prompt that can be pasted into GPTs before the next session.
+11. Suggest one small practical next step to Coordinator.
+12. Log all writes.
 
 ## Output Shape
 
@@ -68,6 +73,24 @@ Speech-to-text, transcript summarization, and voice practice tools are later add
     "transcript_count": 0,
     "practice_situations": [],
     "progress_signal": "unknown | light | steady | needs_review"
+  },
+  "learning_profile": {
+    "agent_interpretation": "",
+    "scope": {},
+    "progression": [],
+    "improvement_signals": [],
+    "persistent_issues": [],
+    "correction_insights": [],
+    "learned_inventory": [],
+    "next_focus": []
+  },
+  "issue_tracker": {
+    "issues": [],
+    "recurrence_checks": []
+  },
+  "pre_study_context": {
+    "prompt": "",
+    "active_issues": []
   },
   "notes": [
     {

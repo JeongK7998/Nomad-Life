@@ -3,681 +3,681 @@
   "source": "local_public_export",
   "exercises": [
     {
-      "id": "axe_hold",
-      "equipment": [
-        "dumbbell"
-      ],
-      "secondary_muscles": [],
-      "difficulty": null,
-      "name_en": "Axe Hold",
-      "movement_pattern": null,
+      "source": "wger",
       "image_url": null,
-      "source_url": "https://wger.de/en/exercise/31/view/axe_hold",
+      "secondary_muscles": [],
+      "movement_pattern": null,
+      "name_ko": null,
+      "name_en": "Axe Hold",
       "instructions": [
         "Grab dumbbells and extend arms to side and hold as long as you can"
       ],
-      "source": "wger",
-      "primary_muscle": "arms",
-      "name_ko": null
-    },
-    {
-      "id": "fingerboard_20_mm_edge",
-      "equipment": [],
-      "secondary_muscles": [],
-      "difficulty": null,
-      "name_en": "Fingerboard 20 mm edge",
-      "movement_pattern": null,
-      "image_url": null,
-      "source_url": "https://wger.de/en/exercise/820/view/fingerboard_20_mm_edge",
-      "instructions": [
-        "Hang for 10 seconds on a fingerboard with a 20 mm edge"
-      ],
-      "source": "wger",
-      "primary_muscle": "arms",
-      "name_ko": null
-    },
-    {
-      "id": "handstand_push_up",
-      "equipment": [],
-      "secondary_muscles": [],
-      "difficulty": null,
-      "name_en": "Handstand Push Up",
-      "movement_pattern": null,
-      "image_url": null,
-      "source_url": "https://wger.de/en/exercise/907/view/handstand_push_up",
-      "instructions": [
-        "Handstands Push Up which demand high level of skill"
-      ],
-      "source": "wger",
-      "primary_muscle": "shoulders",
-      "name_ko": null
-    },
-    {
-      "id": "incline_bench_reverse_fly",
       "equipment": [
         "dumbbell"
       ],
-      "secondary_muscles": [],
+      "source_url": "https://wger.de/en/exercise/31/view/axe_hold",
       "difficulty": null,
-      "name_en": "Incline Bench Reverse Fly",
+      "id": "axe_hold",
+      "primary_muscle": "arms"
+    },
+    {
+      "source": "wger",
+      "image_url": null,
+      "secondary_muscles": [],
       "movement_pattern": null,
+      "name_ko": null,
+      "name_en": "Fingerboard 20 mm edge",
+      "instructions": [
+        "Hang for 10 seconds on a fingerboard with a 20 mm edge"
+      ],
+      "equipment": [],
+      "source_url": "https://wger.de/en/exercise/820/view/fingerboard_20_mm_edge",
+      "difficulty": null,
+      "id": "fingerboard_20_mm_edge",
+      "primary_muscle": "arms"
+    },
+    {
+      "source": "wger",
+      "image_url": null,
+      "secondary_muscles": [],
+      "movement_pattern": null,
+      "name_ko": null,
+      "name_en": "Handstand Push Up",
+      "instructions": [
+        "Handstands Push Up which demand high level of skill"
+      ],
+      "equipment": [],
+      "source_url": "https://wger.de/en/exercise/907/view/handstand_push_up",
+      "difficulty": null,
+      "id": "handstand_push_up",
+      "primary_muscle": "shoulders"
+    },
+    {
+      "source": "wger",
       "image_url": "https://wger.de/media/exercise-images/828/2e959dab-f39b-4c7c-9063-eb43064ab5eb.png",
-      "source_url": "https://wger.de/en/exercise/828/view/incline_bench_reverse_fly",
+      "secondary_muscles": [],
+      "movement_pattern": null,
+      "name_ko": null,
+      "name_en": "Incline Bench Reverse Fly",
       "instructions": [
         "The incline dumbbell reverse fly is an upper-body exercise targeting the posterior or rear deltoids, as well as the postural muscles of the upper back.",
         "Because it targets such small muscles, this exercise is usually performed with light weight for high reps, such as 10-15 reps per set or more."
       ],
-      "source": "wger",
-      "primary_muscle": "back",
-      "name_ko": null
-    },
-    {
-      "id": "lying_dumbbell_row_ss_seated_shrug",
       "equipment": [
         "dumbbell"
       ],
-      "secondary_muscles": [],
+      "source_url": "https://wger.de/en/exercise/828/view/incline_bench_reverse_fly",
       "difficulty": null,
-      "name_en": "LYING DUMBBELL ROW SS SEATED SHRUG",
-      "movement_pattern": null,
+      "id": "incline_bench_reverse_fly",
+      "primary_muscle": "back"
+    },
+    {
+      "source": "wger",
       "image_url": null,
-      "source_url": "https://wger.de/en/exercise/923/view/lying_dumbbell_row_ss_seated_shrug",
+      "secondary_muscles": [],
+      "movement_pattern": null,
+      "name_ko": null,
+      "name_en": "LYING DUMBBELL ROW SS SEATED SHRUG",
       "instructions": [
         "laying on the stomach on a bench with slight angle"
       ],
-      "source": "wger",
-      "primary_muscle": "back",
-      "name_ko": null
+      "equipment": [
+        "dumbbell"
+      ],
+      "source_url": "https://wger.de/en/exercise/923/view/lying_dumbbell_row_ss_seated_shrug",
+      "difficulty": null,
+      "id": "lying_dumbbell_row_ss_seated_shrug",
+      "primary_muscle": "back"
     },
     {
-      "id": "single_arm_plank_to_row",
-      "equipment": [
-        "kettlebell"
-      ],
-      "secondary_muscles": [],
-      "difficulty": null,
-      "name_en": "Single Arm Plank to Row",
-      "movement_pattern": null,
+      "source": "wger",
       "image_url": "https://wger.de/media/exercise-images/1022/f74644fa-f43e-46bd-8603-6e3a2ee8ee2d.jpg",
-      "source_url": "https://wger.de/en/exercise/1022/view/single_arm_plank_to_row",
+      "secondary_muscles": [],
+      "movement_pattern": null,
+      "name_ko": null,
+      "name_en": "Single Arm Plank to Row",
       "instructions": [
         "Start position as row, extend to plank and back.",
         "Finish with row and repeat"
       ],
-      "source": "wger",
-      "primary_muscle": "back",
-      "name_ko": null
+      "equipment": [
+        "kettlebell"
+      ],
+      "source_url": "https://wger.de/en/exercise/1022/view/single_arm_plank_to_row",
+      "difficulty": null,
+      "id": "single_arm_plank_to_row",
+      "primary_muscle": "back"
     },
     {
-      "id": "step_ups",
-      "equipment": [
-        "bench"
-      ],
-      "secondary_muscles": [],
-      "difficulty": null,
-      "name_en": "Step-ups",
-      "movement_pattern": null,
+      "source": "wger",
       "image_url": null,
-      "source_url": "https://wger.de/en/exercise/981/view/step_ups",
+      "secondary_muscles": [],
+      "movement_pattern": null,
+      "name_ko": null,
+      "name_en": "Step-ups",
       "instructions": [
         "Starting position:\n\nStand facing a chair.",
         "Steps:\n\n1.",
         "Step up onto the chair."
       ],
-      "source": "wger",
-      "primary_muscle": "legs",
-      "name_ko": null
+      "equipment": [
+        "bench"
+      ],
+      "source_url": "https://wger.de/en/exercise/981/view/step_ups",
+      "difficulty": null,
+      "id": "step_ups",
+      "primary_muscle": "legs"
     },
     {
-      "id": "tricep_pushdown_on_cable",
-      "equipment": [],
-      "secondary_muscles": [],
-      "difficulty": null,
-      "name_en": "Tricep Pushdown on Cable",
-      "movement_pattern": null,
+      "source": "wger",
       "image_url": null,
-      "source_url": "https://wger.de/en/exercise/805/view/tricep_pushdown_on_cable",
+      "secondary_muscles": [],
+      "movement_pattern": null,
+      "name_ko": null,
+      "name_en": "Tricep Pushdown on Cable",
       "instructions": [
         "The cable rope push-down is a popular exercise targeting the triceps muscles.",
         "It's easy to learn and perform, making it a favorite for everyone from beginners to advanced lifters.",
         "It is usually performed for moderate to high reps, such as 8-12 reps or more per set, as part of an upper-body or arm-focused workout."
       ],
-      "source": "wger",
-      "primary_muscle": "arms",
-      "name_ko": null
+      "equipment": [],
+      "source_url": "https://wger.de/en/exercise/805/view/tricep_pushdown_on_cable",
+      "difficulty": null,
+      "id": "tricep_pushdown_on_cable",
+      "primary_muscle": "arms"
     },
     {
-      "id": "zone_2_running",
-      "equipment": [],
-      "secondary_muscles": [],
-      "difficulty": null,
-      "name_en": "Zone 2 Running",
-      "movement_pattern": null,
+      "source": "wger",
       "image_url": null,
-      "source_url": "https://wger.de/en/exercise/908/view/zone_2_running",
+      "secondary_muscles": [],
+      "movement_pattern": null,
+      "name_ko": null,
+      "name_en": "Zone 2 Running",
       "instructions": [
         "Zone two Cardio for endurance, you should be able to speak while running"
       ],
-      "source": "wger",
-      "primary_muscle": "other",
-      "name_ko": null
+      "equipment": [],
+      "source_url": "https://wger.de/en/exercise/908/view/zone_2_running",
+      "difficulty": null,
+      "id": "zone_2_running",
+      "primary_muscle": "other"
     },
     {
-      "id": "commando_pull_ups",
-      "equipment": [
-        "pull_up_bar"
-      ],
-      "secondary_muscles": [],
-      "difficulty": null,
-      "name_en": "commando pull-ups",
-      "movement_pattern": null,
+      "source": "wger",
       "image_url": null,
-      "source_url": "https://wger.de/en/exercise/980/view/commando_pull_ups",
+      "secondary_muscles": [],
+      "movement_pattern": null,
+      "name_ko": null,
+      "name_en": "commando pull-ups",
       "instructions": [
         "variation of the pull-up exercise, it is performed with a grip of one hand supine and one hand prone, do not twist the torso to get back to the front, the head passes once to one side, once to the other."
       ],
-      "source": "wger",
-      "primary_muscle": "core",
-      "name_ko": null
+      "equipment": [
+        "pull_up_bar"
+      ],
+      "source_url": "https://wger.de/en/exercise/980/view/commando_pull_ups",
+      "difficulty": null,
+      "id": "commando_pull_ups",
+      "primary_muscle": "core"
     },
     {
-      "id": "dumbbell_press",
-      "equipment": [
-        "dumbbell",
-        "bench"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "shoulders",
         "arms"
       ],
-      "difficulty": "beginner",
-      "name_en": "Dumbbell Press",
       "movement_pattern": "push",
-      "source_url": null,
+      "name_ko": "덤벨 프레스",
+      "name_en": "Dumbbell Press",
       "instructions": [
         "덤벨을 가슴 옆에서 시작한다.",
         "양쪽 균형을 유지하며 위로 밀어 올린다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "chest",
-      "name_ko": "덤벨 프레스"
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "dumbbell_press",
+      "primary_muscle": "chest"
     },
     {
-      "id": "deadlift",
-      "equipment": [
-        "barbell"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "legs",
         "back",
         "core"
       ],
-      "difficulty": "advanced",
-      "name_en": "Deadlift",
       "movement_pattern": "hinge",
-      "source_url": null,
+      "name_ko": "데드리프트",
+      "name_en": "Deadlift",
       "instructions": [
         "바를 몸 가까이에 두고 들어 올린다.",
         "허리를 중립으로 유지한다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "full_body",
-      "name_ko": "데드리프트"
+      "equipment": [
+        "barbell"
+      ],
+      "source_url": null,
+      "difficulty": "advanced",
+      "id": "deadlift",
+      "primary_muscle": "full_body"
     },
     {
-      "id": "dips",
-      "equipment": [
-        "parallel_bars"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "chest",
         "shoulders"
       ],
-      "difficulty": "intermediate",
-      "name_en": "Dips",
       "movement_pattern": "push",
-      "source_url": null,
+      "name_ko": "딥스",
+      "name_en": "Dips",
       "instructions": [
         "몸을 내려 팔꿈치를 굽힌다.",
         "어깨 통증이 있으면 깊이를 줄인다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "arms",
-      "name_ko": "딥스"
+      "equipment": [
+        "parallel_bars"
+      ],
+      "source_url": null,
+      "difficulty": "intermediate",
+      "id": "dips",
+      "primary_muscle": "arms"
     },
     {
-      "id": "lat_pulldown",
-      "equipment": [
-        "cable_machine"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "arms"
       ],
-      "difficulty": "beginner",
-      "name_en": "Lat Pulldown",
       "movement_pattern": "pull",
-      "source_url": null,
+      "name_ko": "랫풀다운",
+      "name_en": "Lat Pulldown",
       "instructions": [
         "바를 쇄골 방향으로 당긴다.",
         "몸을 과하게 젖히지 않는다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "back",
-      "name_ko": "랫풀다운"
+      "equipment": [
+        "cable_machine"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "lat_pulldown",
+      "primary_muscle": "back"
     },
     {
-      "id": "lunge",
-      "equipment": [
-        "bodyweight",
-        "dumbbell"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "glutes",
         "core"
       ],
-      "difficulty": "beginner",
-      "name_en": "Lunge",
       "movement_pattern": "lunge",
-      "source_url": null,
+      "name_ko": "런지",
+      "name_en": "Lunge",
       "instructions": [
         "한 발을 앞으로 내딛고 내려간다.",
         "앞무릎이 안쪽으로 무너지지 않게 한다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "legs",
-      "name_ko": "런지"
+      "equipment": [
+        "bodyweight",
+        "dumbbell"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "lunge",
+      "primary_muscle": "legs"
     },
     {
-      "id": "leg_raise",
-      "equipment": [
-        "bodyweight"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "hip_flexors"
       ],
-      "difficulty": "beginner",
-      "name_en": "Leg Raise",
       "movement_pattern": "flexion",
-      "source_url": null,
+      "name_ko": "레그레이즈",
+      "name_en": "Leg Raise",
       "instructions": [
         "다리를 들어 올리며 하복부를 쓴다.",
         "허리가 뜨지 않게 범위를 조절한다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "core",
-      "name_ko": "레그레이즈"
+      "equipment": [
+        "bodyweight"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "leg_raise",
+      "primary_muscle": "core"
     },
     {
-      "id": "leg_press",
-      "equipment": [
-        "machine"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "glutes"
       ],
-      "difficulty": "beginner",
-      "name_en": "Leg Press",
       "movement_pattern": "squat",
-      "source_url": null,
+      "name_ko": "레그프레스",
+      "name_en": "Leg Press",
       "instructions": [
         "발판을 밀어 무릎을 편다.",
         "무릎을 완전히 잠그지 않는다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "legs",
-      "name_ko": "레그프레스"
+      "equipment": [
+        "machine"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "leg_press",
+      "primary_muscle": "legs"
     },
     {
-      "id": "romanian_deadlift",
-      "equipment": [
-        "barbell",
-        "dumbbell"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "back",
         "core"
       ],
-      "difficulty": "intermediate",
-      "name_en": "Romanian Deadlift",
       "movement_pattern": "hinge",
-      "source_url": null,
+      "name_ko": "루마니안 데드리프트",
+      "name_en": "Romanian Deadlift",
       "instructions": [
         "엉덩이를 뒤로 보내며 상체를 숙인다.",
         "햄스트링 긴장을 느끼고 올라온다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "legs",
-      "name_ko": "루마니안 데드리프트"
+      "equipment": [
+        "barbell",
+        "dumbbell"
+      ],
+      "source_url": null,
+      "difficulty": "intermediate",
+      "id": "romanian_deadlift",
+      "primary_muscle": "legs"
     },
     {
-      "id": "rear_delt_fly",
-      "equipment": [
-        "dumbbell",
-        "machine"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "back"
       ],
-      "difficulty": "beginner",
-      "name_en": "Rear Delt Fly",
       "movement_pattern": "fly",
-      "source_url": null,
+      "name_ko": "리어 델트 플라이",
+      "name_en": "Rear Delt Fly",
       "instructions": [
         "상체를 숙이고 팔을 뒤쪽으로 벌린다.",
         "반동 없이 후면 어깨를 사용한다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "shoulders",
-      "name_ko": "리어 델트 플라이"
+      "equipment": [
+        "dumbbell",
+        "machine"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "rear_delt_fly",
+      "primary_muscle": "shoulders"
     },
     {
-      "id": "barbell_row",
-      "equipment": [
-        "barbell"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "arms",
         "core"
       ],
-      "difficulty": "intermediate",
-      "name_en": "Barbell Row",
       "movement_pattern": "pull",
-      "source_url": null,
+      "name_ko": "바벨 로우",
+      "name_en": "Barbell Row",
       "instructions": [
         "상체를 숙이고 허리를 중립으로 둔다.",
         "바벨을 복부 쪽으로 당긴다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "back",
-      "name_ko": "바벨 로우"
+      "equipment": [
+        "barbell"
+      ],
+      "source_url": null,
+      "difficulty": "intermediate",
+      "id": "barbell_row",
+      "primary_muscle": "back"
     },
     {
-      "id": "biceps_curl",
+      "source": "local_seed",
+      "secondary_muscles": [],
+      "movement_pattern": "curl",
+      "name_ko": "바이셉스 컬",
+      "name_en": "Biceps Curl",
+      "instructions": [
+        "팔꿈치를 고정하고 무게를 들어 올린다.",
+        "내릴 때도 천천히 통제한다."
+      ],
       "equipment": [
         "dumbbell",
         "barbell",
         "cable_machine"
       ],
-      "secondary_muscles": [],
-      "difficulty": "beginner",
-      "name_en": "Biceps Curl",
-      "movement_pattern": "curl",
       "source_url": null,
-      "instructions": [
-        "팔꿈치를 고정하고 무게를 들어 올린다.",
-        "내릴 때도 천천히 통제한다."
-      ],
-      "source": "local_seed",
-      "primary_muscle": "arms",
-      "name_ko": "바이셉스 컬"
+      "difficulty": "beginner",
+      "id": "biceps_curl",
+      "primary_muscle": "arms"
     },
     {
-      "id": "burpee",
-      "equipment": [
-        "bodyweight"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "core",
         "legs",
         "chest"
       ],
-      "difficulty": "intermediate",
-      "name_en": "Burpee",
       "movement_pattern": "conditioning",
-      "source_url": null,
+      "name_ko": "버피",
+      "name_en": "Burpee",
       "instructions": [
         "스쿼트, 플랭크, 점프를 연결한다.",
         "호흡이 무너지면 반복 수를 줄인다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "full_body",
-      "name_ko": "버피"
+      "equipment": [
+        "bodyweight"
+      ],
+      "source_url": null,
+      "difficulty": "intermediate",
+      "id": "burpee",
+      "primary_muscle": "full_body"
     },
     {
-      "id": "bench_press",
-      "equipment": [
-        "barbell",
-        "bench"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "shoulders",
         "arms"
       ],
-      "difficulty": "intermediate",
-      "name_en": "Bench Press",
       "movement_pattern": "push",
-      "source_url": null,
+      "name_ko": "벤치프레스",
+      "name_en": "Bench Press",
       "instructions": [
         "바벨을 가슴 중앙까지 내린다.",
         "견갑을 고정하고 위로 밀어 올린다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "chest",
-      "name_ko": "벤치프레스"
+      "equipment": [
+        "barbell",
+        "bench"
+      ],
+      "source_url": null,
+      "difficulty": "intermediate",
+      "id": "bench_press",
+      "primary_muscle": "chest"
     },
     {
-      "id": "lateral_raise",
-      "equipment": [
-        "dumbbell",
-        "cable_machine"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [],
-      "difficulty": "beginner",
-      "name_en": "Lateral Raise",
       "movement_pattern": "raise",
-      "source_url": null,
+      "name_ko": "사이드 레터럴 레이즈",
+      "name_en": "Lateral Raise",
       "instructions": [
         "팔을 옆으로 들어 올린다.",
         "승모근이 과하게 개입되지 않게 낮은 중량으로 한다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "shoulders",
-      "name_ko": "사이드 레터럴 레이즈"
+      "equipment": [
+        "dumbbell",
+        "cable_machine"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "lateral_raise",
+      "primary_muscle": "shoulders"
     },
     {
-      "id": "squat",
-      "equipment": [
-        "barbell",
-        "bodyweight"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "core"
       ],
-      "difficulty": "intermediate",
-      "name_en": "Squat",
       "movement_pattern": "squat",
-      "source_url": null,
+      "name_ko": "스쿼트",
+      "name_en": "Squat",
       "instructions": [
         "발을 안정적으로 두고 앉듯이 내려간다.",
         "무릎과 발끝 방향을 맞춘다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "legs",
-      "name_ko": "스쿼트"
+      "equipment": [
+        "barbell",
+        "bodyweight"
+      ],
+      "source_url": null,
+      "difficulty": "intermediate",
+      "id": "squat",
+      "primary_muscle": "legs"
     },
     {
-      "id": "seated_row",
-      "equipment": [
-        "cable_machine"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "arms"
       ],
-      "difficulty": "beginner",
-      "name_en": "Seated Row",
       "movement_pattern": "pull",
-      "source_url": null,
+      "name_ko": "시티드 로우",
+      "name_en": "Seated Row",
       "instructions": [
         "손잡이를 복부 쪽으로 당긴다.",
         "가슴을 열고 어깨가 말리지 않게 한다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "back",
-      "name_ko": "시티드 로우"
+      "equipment": [
+        "cable_machine"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "seated_row",
+      "primary_muscle": "back"
     },
     {
-      "id": "overhead_press",
-      "equipment": [
-        "barbell",
-        "dumbbell"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "arms",
         "core"
       ],
-      "difficulty": "intermediate",
-      "name_en": "Overhead Press",
       "movement_pattern": "push",
-      "source_url": null,
+      "name_ko": "오버헤드 프레스",
+      "name_en": "Overhead Press",
       "instructions": [
         "어깨 높이에서 시작해 머리 위로 민다.",
         "허리가 과하게 꺾이지 않게 복부를 잡는다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "shoulders",
-      "name_ko": "오버헤드 프레스"
-    },
-    {
-      "id": "incline_bench_press",
       "equipment": [
         "barbell",
-        "incline_bench"
+        "dumbbell"
       ],
+      "source_url": null,
+      "difficulty": "intermediate",
+      "id": "overhead_press",
+      "primary_muscle": "shoulders"
+    },
+    {
+      "source": "local_seed",
       "secondary_muscles": [
         "shoulders",
         "arms"
       ],
-      "difficulty": "intermediate",
-      "name_en": "Incline Bench Press",
       "movement_pattern": "push",
-      "source_url": null,
+      "name_ko": "인클라인 벤치프레스",
+      "name_en": "Incline Bench Press",
       "instructions": [
         "벤치를 기울여 상부 가슴을 겨냥한다.",
         "팔꿈치가 과하게 벌어지지 않게 누른다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "chest",
-      "name_ko": "인클라인 벤치프레스"
+      "equipment": [
+        "barbell",
+        "incline_bench"
+      ],
+      "source_url": null,
+      "difficulty": "intermediate",
+      "id": "incline_bench_press",
+      "primary_muscle": "chest"
     },
     {
-      "id": "chest_fly",
-      "equipment": [
-        "machine",
-        "dumbbell"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "shoulders"
       ],
-      "difficulty": "beginner",
-      "name_en": "Chest Fly",
       "movement_pattern": "fly",
-      "source_url": null,
+      "name_ko": "체스트 플라이",
+      "name_en": "Chest Fly",
       "instructions": [
         "팔꿈치를 살짝 굽힌 상태로 벌린다.",
         "가슴을 모으듯 중앙으로 당긴다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "chest",
-      "name_ko": "체스트 플라이"
+      "equipment": [
+        "machine",
+        "dumbbell"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "chest_fly",
+      "primary_muscle": "chest"
     },
     {
-      "id": "crunch",
-      "equipment": [
-        "bodyweight"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [],
-      "difficulty": "beginner",
-      "name_en": "Crunch",
       "movement_pattern": "flexion",
-      "source_url": null,
+      "name_ko": "크런치",
+      "name_en": "Crunch",
       "instructions": [
         "상체를 말아 올리며 복부를 수축한다.",
         "목을 손으로 당기지 않는다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "core",
-      "name_ko": "크런치"
+      "equipment": [
+        "bodyweight"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "crunch",
+      "primary_muscle": "core"
     },
     {
-      "id": "clean",
-      "equipment": [
-        "barbell"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "legs",
         "back",
         "shoulders"
       ],
-      "difficulty": "advanced",
-      "name_en": "Clean",
       "movement_pattern": "power",
-      "source_url": null,
+      "name_ko": "클린",
+      "name_en": "Clean",
       "instructions": [
         "바벨을 폭발적으로 끌어올린다.",
         "기술 난도가 높으므로 낮은 중량으로 연습한다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "full_body",
-      "name_ko": "클린"
+      "equipment": [
+        "barbell"
+      ],
+      "source_url": null,
+      "difficulty": "advanced",
+      "id": "clean",
+      "primary_muscle": "full_body"
     },
     {
-      "id": "triceps_pushdown",
-      "equipment": [
-        "cable_machine"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [],
-      "difficulty": "beginner",
-      "name_en": "Triceps Pushdown",
       "movement_pattern": "push",
-      "source_url": null,
+      "name_ko": "트라이셉스 푸시다운",
+      "name_en": "Triceps Pushdown",
       "instructions": [
         "팔꿈치를 몸 옆에 고정한다.",
         "손잡이를 아래로 눌러 삼두를 수축한다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "arms",
-      "name_ko": "트라이셉스 푸시다운"
+      "equipment": [
+        "cable_machine"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "triceps_pushdown",
+      "primary_muscle": "arms"
     },
     {
-      "id": "pull_up",
-      "equipment": [
-        "pull_up_bar"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "arms",
         "core"
       ],
-      "difficulty": "advanced",
-      "name_en": "Pull-up",
       "movement_pattern": "pull",
-      "source_url": null,
+      "name_ko": "풀업",
+      "name_en": "Pull-up",
       "instructions": [
         "바를 잡고 몸을 수직으로 당긴다.",
         "턱이 바 위로 올라온 뒤 천천히 내려온다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "back",
-      "name_ko": "풀업"
+      "equipment": [
+        "pull_up_bar"
+      ],
+      "source_url": null,
+      "difficulty": "advanced",
+      "id": "pull_up",
+      "primary_muscle": "back"
     },
     {
-      "id": "plank",
-      "equipment": [
-        "bodyweight"
-      ],
+      "source": "local_seed",
       "secondary_muscles": [
         "shoulders"
       ],
-      "difficulty": "beginner",
-      "name_en": "Plank",
       "movement_pattern": "static",
-      "source_url": null,
+      "name_ko": "플랭크",
+      "name_en": "Plank",
       "instructions": [
         "팔꿈치와 발끝으로 몸을 지탱한다.",
         "허리가 처지지 않게 유지한다."
       ],
-      "source": "local_seed",
-      "primary_muscle": "core",
-      "name_ko": "플랭크"
+      "equipment": [
+        "bodyweight"
+      ],
+      "source_url": null,
+      "difficulty": "beginner",
+      "id": "plank",
+      "primary_muscle": "core"
     }
   ]
 }

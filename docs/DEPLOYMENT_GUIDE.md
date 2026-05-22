@@ -199,6 +199,8 @@ npm run sync:watch
 
 `scripts/run_nomad_sync.py` loads `.env`, prevents overlapping runs with `data/sync/nomad-sync.lock`, calls `scripts/supabase_worker.py`, and appends a local run summary to `data/action_logs/nomad-sync-runs.jsonl`.
 
+When snapshot publishing runs, the worker first imports the latest read-only Finance JSON export from the configured iCloud Drive Finance folder and refreshes `dashboard/finance-review.json`. It then publishes that analysis as the `finance-review` dashboard snapshot for mobile and hosted Dashboard views.
+
 The worker writes `sync_logs` rows in Supabase project "Nomad Life" for queue pulls, processed items, failures, and snapshot publishes. Review this table first when a mobile capture, Workout Quick entry, or hosted dashboard snapshot looks stale.
 
 Preview publishable snapshots without Supabase credentials:

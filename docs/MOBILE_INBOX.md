@@ -37,9 +37,11 @@ iPhone / iPad Shortcut or Files app
 
 Roles:
 
-- Supabase queue: primary always-accessible structured input.
+- Supabase queue/input ledger: primary always-accessible structured input.
 - Local Dashboard: immediate local feedback while MacBook is running.
 - iCloud Drive: offline fallback/dropbox for files and large media.
+
+Direct user input should be visible in Input History immediately as `입력됨`. Mac Hermes analysis can lag behind and should be shown separately as `분석 대기` or `분석됨`.
 
 ## iPhone Home Screen Entry
 
@@ -61,7 +63,7 @@ The hosted route is stable:
 https://nomad-life-neon.vercel.app/workout
 ```
 
-On iPhone, open this URL in Safari and choose Share -> Add to Home Screen. The installed icon opens the workout input form directly and shares an in-progress workout draft with the Health form in the main dashboard.
+On iPhone or iPad, open this URL in Safari, log in with the Nomad Life Supabase account once, and choose Share -> Add to Home Screen. The installed icon keeps the Supabase Auth session for that device/app container and opens the workout input form directly. Queue data and dashboard snapshots are shared with other logged-in devices on the same hosted address when they use the same Supabase Auth account.
 
 ## Supabase Queue Payloads
 

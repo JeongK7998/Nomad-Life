@@ -1,29 +1,29 @@
 {
-  "name": "Nomad Workout Quick",
-  "short_name": "Workout",
-  "description": "Nomad Life Health Agent로 보내는 빠른 운동 입력 패널",
+  "name": "Nomad Quick",
+  "short_name": "Nomad Quick",
+  "description": "Nomad Life 구조화 입력 패널",
   "lang": "ko",
-  "start_url": "/workout",
-  "scope": "/",
+  "start_url": "/web/#quick",
+  "scope": "/web/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#171719",
-  "theme_color": "#171719",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "/icons/workout-icon-192.png",
+      "src": "/web/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/workout-icon-512.png",
+      "src": "/web/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/workout-maskable-512.png",
+      "src": "/web/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -31,13 +31,13 @@
   ],
   "shortcuts": [
     {
-      "name": "Workout Quick",
-      "short_name": "Workout",
-      "description": "근력운동 세트를 빠르게 기록",
-      "url": "/workout",
+      "name": "Nomad Quick",
+      "short_name": "Quick",
+      "description": "활동을 빠르게 기록",
+      "url": "/web/#quick",
       "icons": [
         {
-          "src": "/icons/workout-icon-192.png",
+          "src": "/web/icon-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
